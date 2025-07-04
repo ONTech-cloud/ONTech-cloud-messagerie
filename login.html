@@ -1,90 +1,147 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Connexion - ON Tech</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f3f3;
-      text-align: center;
-      padding: 40px;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    input {
-      display: block;
-      margin: 12px auto;
-      padding: 10px;
-      width: 90%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #1976d2;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #message {
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Connexion ON Tech</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    display: flex; justify-content: center; align-items: center; height: 100vh;
+    margin: 0;
+  }
+  #container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.2);
+    width: 320px;
+  }
+  h2 {
+    color: #1976d2;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  input {
+    width: 100%; padding: 10px 14px; margin-bottom: 16px; border-radius: 10px; border: 1px solid #ccc;
+    font-size: 15px; outline: none;
+  }
+  button {
+    width: 100%; padding: 12px; background: #1976d2; border: none; color: white; font-weight: 700;
+    border-radius: 10px; cursor: pointer; font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background: #135ba1;
+  }
+  #switchBtn {
+    background: none; color: #1976d2; border: none; margin-top: 12px;
+    cursor: pointer; font-size: 14px; text-decoration: underline;
+  }
+  #errorMsg {
+    color: #f44336; margin-bottom: 12px; min-height: 18px; text-align: center;
+  }
+</style>
 </head>
 <body>
 
-  <h2>Connexion à ON Tech</h2>
-  <form onsubmit="loginUser(event)">
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Mot de passe" required>
-    <button type="submit">Se connecter</button>
-  </form>
+<div id="container">
+  <h2 id="formTitle">Connexion</h2>
+  <div id="errorMsg"></div>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Mot de passe" />
+  <input type="text" id="username" placeholder="Nom d'utilisateur" style="display:none;" />
+  <button id="actionBtn">Se connecter</button>
+  <button id="switchBtn">Créer un compte</button>
+</div>
 
-  <div id="message"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+    authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+    projectId: "messagerie-ontech-cloud",
+    storageBucket: "messagerie-ontech-cloud.appspot.com",
+    messagingSenderId: "45424467520",
+    appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
-      authDomain: "messagerie-ontech-cloud.firebaseapp.com",
-      projectId: "messagerie-ontech-cloud",
-      storageBucket: "messagerie-ontech-cloud.appspot.com",
-      messagingSenderId: "45424467520",
-      appId: "1:45424467520:web:0d996077888bea6c5f09a5"
-    };
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const usernameInput = document.getElementById('username');
+  const actionBtn = document.getElementById('actionBtn');
+  const switchBtn = document.getElementById('switchBtn');
+  const formTitle = document.getElementById('formTitle');
+  const errorMsg = document.getElementById('errorMsg');
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  let isLogin = true;
 
-    async function loginUser(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const msg = document.getElementById("message");
+  switchBtn.onclick = () => {
+    isLogin = !isLogin;
+    if (isLogin) {
+      formTitle.textContent = "Connexion";
+      actionBtn.textContent = "Se connecter";
+      usernameInput.style.display = "none";
+      switchBtn.textContent = "Créer un compte";
+      errorMsg.textContent = "";
+    } else {
+      formTitle.textContent = "Créer un compte";
+      actionBtn.textContent = "Créer un compte";
+      usernameInput.style.display = "block";
+      switchBtn.textContent = "Retour à la connexion";
+      errorMsg.textContent = "";
+    }
+  };
 
-      msg.innerText = "⏳ Connexion en cours...";
+  actionBtn.onclick = async () => {
+    errorMsg.textContent = "";
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const username = usernameInput.value.trim().toLowerCase();
 
+    if (!email || !password || (!isLogin && !username)) {
+      errorMsg.textContent = "Veuillez remplir tous les champs.";
+      return;
+    }
+
+    if (!isLogin) {
+      // Vérifier si username existe déjà
+      const usernameQuery = await db.collection('users').where('username', '==', username).get();
+      if (!username || usernameQuery.docs.length > 0) {
+        errorMsg.textContent = "Nom d'utilisateur déjà pris ou invalide.";
+        return;
+      }
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        // Enregistrer username dans Firestore
+        await db.collection('users').doc(user.uid).set({
+          username: username,
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        window.location.href = "chat.html";
+      } catch (error) {
+        errorMsg.textContent = error.message;
+      }
+    } else {
+      // Connexion
       try {
         await auth.signInWithEmailAndPassword(email, password);
-        msg.innerText = "✅ Connexion réussie !";
-        setTimeout(() => {
-          window.location.href = "chat.html"; // 🔜 Prochaine étape
-        }, 1000);
+        window.location.href = "chat.html";
       } catch (error) {
-        msg.innerText = `❌ Erreur : ${error.message}`;
+        errorMsg.textContent = error.message;
       }
     }
-  </script>
+  };
+</script>
+
 </body>
 </html>

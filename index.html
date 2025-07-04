@@ -8,22 +8,22 @@
   <h1>🔥 Test Firebase ON Tech</h1>
   <p id="status">Connexion en cours...</p>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <!-- ✅ Version "compat" des SDK Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
       authDomain: "messagerie-ontech-cloud.firebaseapp.com",
       projectId: "messagerie-ontech-cloud",
-      storageBucket: "messagerie-ontech-cloud.appspot.com", // ✅ corrigé ici
+      storageBucket: "messagerie-ontech-cloud.appspot.com",
       messagingSenderId: "45424467520",
       appId: "1:45424467520:web:0d996077888bea6c5f09a5"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     document.getElementById("status").innerText = "✅ Firebase est bien connecté !";
   </script>
 </body>

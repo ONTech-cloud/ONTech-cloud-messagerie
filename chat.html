@@ -12,10 +12,15 @@
     padding: 0;
     height: 100vh;
     font-family: 'Poppins', sans-serif;
-    display: flex;
     background: #f5f7fa;
     overflow: hidden;
   }
+
+  body {
+    display: flex;
+    flex-direction: row;
+  }
+
   #sidebar {
     width: 280px;
     background: linear-gradient(135deg, #1976d2 0%, #63a4ff 100%);
@@ -25,12 +30,14 @@
     padding: 20px;
     box-sizing: border-box;
   }
+
   #sidebar header {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 20px;
     user-select: none;
   }
+
   #searchUserInput {
     padding: 10px 12px;
     border-radius: 8px;
@@ -38,10 +45,22 @@
     font-size: 16px;
     margin-bottom: 16px;
   }
+
+  #logoutBtn {
+    padding: 10px 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: #ef5350;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+
   #userList {
     flex: 1;
     overflow-y: auto;
   }
+
   .userItem {
     padding: 10px 12px;
     border-radius: 12px;
@@ -51,6 +70,7 @@
     transition: background-color 0.3s ease;
     user-select: none;
   }
+
   .userItem:hover {
     background: rgba(255,255,255,0.3);
   }
@@ -62,6 +82,7 @@
     background: #fff;
     box-shadow: inset 0 0 30px #ddd;
     overflow: hidden;
+    width: calc(100% - 280px);
   }
 
   #chatHeader {
@@ -127,6 +148,7 @@
 <div id="sidebar">
   <header>📨 ON Tech</header>
   <input id="searchUserInput" placeholder="Rechercher un utilisateur..." />
+  <button id="logoutBtn">Déconnexion</button>
   <div id="userList"></div>
 </div>
 <div id="mainChat">
@@ -164,6 +186,7 @@
   const chatMessages = document.getElementById("chatMessages");
   const chatInput = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
 
   auth.onAuthStateChanged(async (user) => {
     if (user) {
@@ -173,6 +196,10 @@
       window.location.href = "login.html";
     }
   });
+
+  logoutBtn.onclick = () => {
+    auth.signOut();
+  };
 
   async function handleSearch() {
     const term = searchUserInput.value.trim().toLowerCase();

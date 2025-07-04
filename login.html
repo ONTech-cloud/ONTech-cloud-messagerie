@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connexion - ON Tech</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      text-align: center;
+      padding: 40px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    input {
+      display: block;
+      margin: 12px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 300px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1976d2;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Connexion à ON Tech</h2>
+  <form onsubmit="loginUser(event)">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button type="submit">Se connecter</button>
+  </form>
+
+  <div id="message"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+      authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+      projectId: "messagerie-ontech-cloud",
+      storageBucket: "messagerie-ontech-cloud.appspot.com",
+      messagingSenderId: "45424467520",
+      appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    async function loginUser(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("message");
+
+      msg.innerText = "⏳ Connexion en cours...";
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        msg.innerText = "✅ Connexion réussie !";
+        setTimeout(() => {
+          window.location.href = "chat.html"; // 🔜 Prochaine étape
+        }, 1000);
+      } catch (error) {
+        msg.innerText = `❌ Erreur : ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

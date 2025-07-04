@@ -3,121 +3,146 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ON Tech Chat Privé</title>
+<title>Chat ON Tech</title>
 <style>
-  /* Reset & base */
-  * {
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    background: #f5f7fa;
+    overflow: hidden;
+  }
+  #sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #1976d2 0%, #63a4ff 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
     box-sizing: border-box;
   }
-  body, html {
-    margin: 0; padding: 0; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex; background: #f5f7fa;
-  }
-
-  #sidebar {
-    width: 280px; background: #fff; border-right: 1px solid #ddd;
-    display: flex; flex-direction: column;
-  }
   #sidebar header {
-    padding: 20px; font-size: 22px; font-weight: bold; color: #1976d2; border-bottom: 1px solid #ddd;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    user-select: none;
   }
-  #searchUser {
-    margin: 15px 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc;
-    font-size: 16px; outline: none;
+  #searchUserInput {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    margin-bottom: 16px;
   }
   #userList {
-    flex: 1; overflow-y: auto; padding: 0 10px;
+    flex: 1;
+    overflow-y: auto;
   }
   .userItem {
-    padding: 10px 12px; border-radius: 8px; cursor: pointer;
-    margin-bottom: 6px; background: #f0f3ff; transition: background-color 0.2s;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
   }
   .userItem:hover {
-    background: #dbe4ff;
+    background: rgba(255,255,255,0.3);
   }
 
   #mainChat {
-    flex: 1; display: flex; flex-direction: column; background: #fff;
-  }
-  #chatHeader {
-    padding: 20px; border-bottom: 1px solid #ddd; font-weight: 700; font-size: 20px; color: #1976d2;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  #messages {
-    flex: 1; padding: 20px; overflow-y: auto; background: #e9efff;
-  }
-  .message {
-    max-width: 70%; margin-bottom: 12px; padding: 10px 14px; border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    word-wrap: break-word;
-  }
-  .message.own {
-    background: #1976d2; color: white; margin-left: auto; border-bottom-right-radius: 0;
-  }
-  .message.other {
-    background: white; color: #333; border-bottom-left-radius: 0;
-  }
-  .message .sender {
-    font-size: 0.85em; font-weight: 600; margin-bottom: 4px; color: #555;
-  }
-  #inputArea {
-    display: flex; padding: 10px 20px; border-top: 1px solid #ddd; background: #f8faff;
-  }
-  #messageInput {
-    flex: 1; padding: 12px 16px; font-size: 16px; border-radius: 20px; border: 1px solid #ccc; outline: none;
-  }
-  #sendBtn {
-    margin-left: 10px; background: #1976d2; border: none; color: white; font-weight: 700;
-    padding: 12px 20px; border-radius: 20px; cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  #sendBtn:disabled {
-    background: #a3c1f7; cursor: default;
-  }
-  #logoutBtn {
-    background: #f44336; border: none; color: white; font-weight: 700;
-    padding: 8px 16px; border-radius: 12px; cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  #logoutBtn:hover {
-    background: #d32f2f;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 0 16px 16px 0;
+    box-shadow: inset 0 0 30px #ddd;
+    overflow: hidden;
   }
 
-  /* Scrollbar stylée */
-  #messages::-webkit-scrollbar, #userList::-webkit-scrollbar {
-    width: 8px;
+  #chatHeader {
+    padding: 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #ddd;
+    user-select: none;
+    background: #e3f2fd;
   }
-  #messages::-webkit-scrollbar-thumb, #userList::-webkit-scrollbar-thumb {
-    background-color: rgba(25, 118, 210, 0.5);
-    border-radius: 4px;
+
+  #chatMessages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fefefe;
+  }
+
+  .message {
+    padding: 10px 14px;
+    background: #e1f5fe;
+    border-radius: 12px;
+    max-width: 70%;
+    align-self: flex-start;
+  }
+
+  .message.self {
+    background: #bbdefb;
+    align-self: flex-end;
+  }
+
+  #chatInputBox {
+    display: flex;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+    background: #fafafa;
+  }
+
+  #chatInput {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+
+  #sendBtn {
+    margin-left: 10px;
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
   }
 </style>
 </head>
 <body>
-
 <div id="sidebar">
-  <header>Utilisateurs</header>
-  <input type="text" id="searchUser" placeholder="Rechercher un utilisateur..." autocomplete="off" />
+  <header>📨 ON Tech</header>
+  <input id="searchUserInput" placeholder="Rechercher un utilisateur..." />
   <div id="userList"></div>
-  <button id="logoutBtn">Déconnexion</button>
 </div>
-
 <div id="mainChat">
-  <div id="chatHeader">Sélectionnez un utilisateur pour discuter</div>
-  <div id="messages"></div>
-  <div id="inputArea" style="display:none;">
-    <input type="text" id="messageInput" placeholder="Écris un message..." autocomplete="off" />
-    <button id="sendBtn" disabled>Envoyer</button>
+  <div id="chatHeader">Sélectionnez un utilisateur</div>
+  <div id="chatMessages"></div>
+  <div id="chatInputBox">
+    <input id="chatInput" placeholder="Tapez un message..." />
+    <button id="sendBtn">Envoyer</button>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
 <script>
-  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
     authDomain: "messagerie-ontech-cloud.firebaseapp.com",
@@ -126,185 +151,84 @@
     messagingSenderId: "45424467520",
     appId: "1:45424467520:web:0d996077888bea6c5f09a5"
   };
-
-  // Init Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // DOM
-  const userListDiv = document.getElementById('userList');
-  const searchUserInput = document.getElementById('searchUser');
-  const chatHeader = document.getElementById('chatHeader');
-  const messagesDiv = document.getElementById('messages');
-  const inputArea = document.getElementById('inputArea');
-  const messageInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-
   let currentUser = null;
-  let currentUserData = null;
-  let currentChatId = null; // id de la conversation en cours
-  let unsubscribeMessages = null;
+  let selectedUser = null;
+  let unsubscribe = null;
 
-  // Déconnexion
-  logoutBtn.onclick = () => {
-    auth.signOut().then(() => {
+  const searchUserInput = document.getElementById("searchUserInput");
+  const userList = document.getElementById("userList");
+  const chatHeader = document.getElementById("chatHeader");
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      searchUserInput.addEventListener("input", handleSearch);
+    } else {
       window.location.href = "login.html";
-    });
-  };
-
-  // Contrôle bouton envoyer
-  messageInput.addEventListener('input', () => {
-    sendBtn.disabled = messageInput.value.trim() === '';
+    }
   });
 
-  // Connexion Firebase
-  auth.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
-    currentUser = user;
+  async function handleSearch() {
+    const term = searchUserInput.value.trim().toLowerCase();
+    userList.innerHTML = "";
+    if (!term) return;
+    const results = await db.collection("users")
+      .where("username", ">=", term)
+      .where("username", "<=", term + "\uf8ff")
+      .get();
 
-    // Récupérer données utilisateur (username)
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      alert('Erreur : données utilisateur introuvables.');
-      auth.signOut();
-      return;
-    }
-    currentUserData = userDoc.data();
-
-    // Afficher la liste des utilisateurs (sauf soi-même)
-    loadUsers();
-
-    // Nettoyer interface
-    clearChat();
-
-  });
-
-  // Charger liste utilisateurs avec recherche simple
-  async function loadUsers() {
-    userListDiv.innerHTML = '<p>Chargement...</p>';
-    let querySnapshot;
-
-    try {
-      querySnapshot = await db.collection('users')
-        .orderBy('username')
-        .limit(50)
-        .get();
-    } catch(e) {
-      userListDiv.innerHTML = '<p>Erreur de chargement</p>';
-      return;
-    }
-
-    displayUsers(querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
-
-    // Recherche en direct
-    searchUserInput.oninput = () => {
-      const val = searchUserInput.value.toLowerCase();
-      const filtered = querySnapshot.docs
-        .map(doc => ({id: doc.id, ...doc.data()}))
-        .filter(u => u.username.toLowerCase().includes(val) && u.id !== currentUser.uid);
-      displayUsers(filtered);
-    };
-  }
-
-  // Afficher la liste filtrée
-  function displayUsers(users) {
-    if (users.length === 0) {
-      userListDiv.innerHTML = '<p>Aucun utilisateur trouvé.</p>';
-      return;
-    }
-    userListDiv.innerHTML = '';
-    users.forEach(user => {
-      const div = document.createElement('div');
-      div.classList.add('userItem');
-      div.textContent = user.username;
-      div.onclick = () => startConversation(user);
-      userListDiv.appendChild(div);
+    results.forEach(doc => {
+      if (doc.id !== currentUser.uid) {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.textContent = data.username;
+        div.className = "userItem";
+        div.onclick = () => selectUser(doc.id, data.username);
+        userList.appendChild(div);
+      }
     });
   }
 
-  // Créer ou ouvrir une conversation 1-à-1
-  async function startConversation(otherUser) {
-    chatHeader.textContent = `Conversation avec ${otherUser.username}`;
-    inputArea.style.display = 'flex';
-    messagesDiv.innerHTML = '<p>Chargement des messages...</p>';
-
-    // Générer un ID conversation stable entre deux utilisateurs (ordre alphabétique des UIDs)
-    const uids = [currentUser.uid, otherUser.id].sort();
-    const conversationId = uids.join('_');
-
-    currentChatId = conversationId;
-
-    // Vérifier si conversation existe, sinon la créer
-    const convDoc = await db.collection('conversations').doc(conversationId).get();
-    if (!convDoc.exists) {
-      await db.collection('conversations').doc(conversationId).set({
-        participants: uids,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
-    // Charger messages en temps réel
-    if (unsubscribeMessages) unsubscribeMessages();
-
-    unsubscribeMessages = db.collection('conversations').doc(conversationId)
-      .collection('messages')
-      .orderBy('createdAt')
+  function selectUser(uid, username) {
+    selectedUser = uid;
+    chatHeader.textContent = `Conversation avec ${username}`;
+    chatMessages.innerHTML = "";
+    if (unsubscribe) unsubscribe();
+    const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    unsubscribe = db.collection("chats").doc(chatId).collection("messages")
+      .orderBy("createdAt")
       .onSnapshot(snapshot => {
-        messagesDiv.innerHTML = '';
-        if (snapshot.empty) {
-          messagesDiv.innerHTML = '<p>Aucun message dans cette conversation.</p>';
-          return;
-        }
+        chatMessages.innerHTML = "";
         snapshot.forEach(doc => {
-          const m = doc.data();
-          const div = document.createElement('div');
-          div.classList.add('message');
-          div.classList.add(m.uid === currentUser.uid ? 'own' : 'other');
-          div.innerHTML = `<div class="sender">${m.username}</div>${escapeHtml(m.text)}`;
-          messagesDiv.appendChild(div);
-          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          const msg = doc.data();
+          const div = document.createElement("div");
+          div.className = "message";
+          if (msg.sender === currentUser.uid) div.classList.add("self");
+          div.textContent = msg.text;
+          chatMessages.appendChild(div);
         });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       });
   }
 
-  // Envoyer un message
   sendBtn.onclick = async () => {
-    const text = messageInput.value.trim();
-    if (!text) return;
-    sendBtn.disabled = true;
-
-    await db.collection('conversations').doc(currentChatId)
-      .collection('messages').add({
-        uid: currentUser.uid,
-        username: currentUserData.username,
-        text: text,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    messageInput.value = '';
-    sendBtn.disabled = false;
+    const text = chatInput.value.trim();
+    if (!text || !selectedUser) return;
+    const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    await db.collection("chats").doc(chatId).collection("messages").add({
+      text,
+      sender: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    chatInput.value = "";
   };
-
-  // Nettoyer chat
-  function clearChat() {
-    currentChatId = null;
-    messagesDiv.innerHTML = '';
-    chatHeader.textContent = 'Sélectionnez un utilisateur pour discuter';
-    inputArea.style.display = 'none';
-  }
-
-  // Fonction sécurité contre injection HTML
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 </script>
-
 </body>
 </html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscription - ON Tech</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 30px;
+      text-align: center;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Créer un compte ON Tech</h2>
+  <form onsubmit="registerUser(event)">
+    <input type="text" id="firstName" placeholder="Prénom" required>
+    <input type="text" id="lastName" placeholder="Nom" required>
+    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+    <input type="date" id="birthdate" placeholder="Date de naissance" required>
+    <input type="email" id="email" placeholder="Adresse email" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button type="submit">S'inscrire</button>
+  </form>
+
+  <div id="message"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+      authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+      projectId: "messagerie-ontech-cloud",
+      storageBucket: "messagerie-ontech-cloud.appspot.com",
+      messagingSenderId: "45424467520",
+      appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    async function registerUser(e) {
+      e.preventDefault();
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const birthdate = document.getElementById('birthdate').value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      const messageDiv = document.getElementById("message");
+      messageDiv.innerText = "⏳ Création du compte...";
+
+      try {
+        // Vérifie si le nom d’utilisateur existe déjà
+        const query = await db.collection("users").where("username", "==", username).get();
+        if (!query.empty) {
+          messageDiv.innerText = "⚠️ Ce nom d'utilisateur est déjà pris.";
+          return;
+        }
+
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCredential.user.uid;
+
+        await db.collection("users").doc(uid).set({
+          firstName,
+          lastName,
+          username,
+          birthdate,
+          email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        messageDiv.innerText = "✅ Compte créé avec succès !";
+      } catch (error) {
+        messageDiv.innerText = `❌ Erreur : ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

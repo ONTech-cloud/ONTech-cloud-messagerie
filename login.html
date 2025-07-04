@@ -17,11 +17,11 @@
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(25, 118, 210, 0.2);
     width: 320px;
+    text-align: center;
   }
   h2 {
     color: #1976d2;
     margin-bottom: 24px;
-    text-align: center;
   }
   input {
     width: 100%; padding: 10px 14px; margin-bottom: 16px; border-radius: 10px; border: 1px solid #ccc;
@@ -40,7 +40,22 @@
     cursor: pointer; font-size: 14px; text-decoration: underline;
   }
   #errorMsg {
-    color: #f44336; margin-bottom: 12px; min-height: 18px; text-align: center;
+    color: #f44336; margin-bottom: 12px; min-height: 18px;
+  }
+  #googleBtn {
+    margin-top: 10px;
+    background: #4285f4;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+  #googleBtn:hover {
+    background: #3367d6;
   }
 </style>
 </head>
@@ -53,6 +68,7 @@
   <input type="password" id="password" placeholder="Mot de passe" />
   <input type="text" id="username" placeholder="Nom d'utilisateur" style="display:none;" />
   <button id="actionBtn">Se connecter</button>
+  <button id="googleBtn">Se connecter avec Google</button>
   <button id="switchBtn">Créer un compte</button>
 </div>
 
@@ -78,6 +94,7 @@
   const usernameInput = document.getElementById('username');
   const actionBtn = document.getElementById('actionBtn');
   const switchBtn = document.getElementById('switchBtn');
+  const googleBtn = document.getElementById('googleBtn');
   const formTitle = document.getElementById('formTitle');
   const errorMsg = document.getElementById('errorMsg');
 
@@ -139,6 +156,27 @@
       } catch (error) {
         errorMsg.textContent = error.message;
       }
+    }
+  };
+
+  // Connexion Google
+  const provider = new firebase.auth.GoogleAuthProvider();
+  googleBtn.onclick = async () => {
+    errorMsg.textContent = "";
+    try {
+      const result = await auth.signInWithPopup(provider);
+      const user = result.user;
+      if (result.additionalUserInfo.isNewUser) {
+        const username = user.email.split('@')[0].toLowerCase();
+        await db.collection('users').doc(user.uid).set({
+          username: username,
+          email: user.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      window.location.href = "chat.html";
+    } catch (error) {
+      errorMsg.textContent = error.message;
     }
   };
 </script>

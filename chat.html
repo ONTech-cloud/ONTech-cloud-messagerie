@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Messagerie ON Tech</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      background: #1976d2;
+      color: white;
+      padding: 15px 20px;
+      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #userInfo {
+      font-weight: bold;
+    }
+    #logoutBtn {
+      background: #f44336;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #messages {
+      flex: 1;
+      padding: 15px 20px;
+      overflow-y: auto;
+      background: white;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+    .message {
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #e3f2fd;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    .message.self {
+      background: #bbdefb;
+      margin-left: auto;
+      text-align: right;
+    }
+    .message .sender {
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 0.85em;
+      color: #0d47a1;
+    }
+    footer {
+      padding: 10px 20px;
+      background: #eee;
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button#sendBtn {
+      background: #1976d2;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button#sendBtn:disabled {
+      background: #a3c1f7;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div id="userInfo">Connecté en tant que <span id="usernameDisplay"></span></div>
+  <button id="logoutBtn">Déconnexion</button>
+</header>
+
+<div id="messages"></div>
+
+<footer>
+  <input type="text" id="messageInput" placeholder="Écris ton message..." autocomplete="off" />
+  <button id="sendBtn" disabled>Envoyer</button>
+</footer>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // Configuration Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+    authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+    projectId: "messagerie-ontech-cloud",
+    storageBucket: "messagerie-ontech-cloud.appspot.com",
+    messagingSenderId: "45424467520",
+    appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+  };
+
+  // Initialisation Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const messagesDiv = document.getElementById("messages");
+  const usernameDisplay = document.getElementById("usernameDisplay");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const messageInput = document.getElementById("messageInput");
+  const sendBtn = document.getElementById("sendBtn");
+
+  let currentUser = null;
+  let currentUsername = "";
+
+  // Activer/désactiver bouton envoyer
+  messageInput.addEventListener("input", () => {
+    sendBtn.disabled = messageInput.value.trim() === "";
+  });
+
+  // Déconnexion
+  logoutBtn.onclick = () => {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  };
+
+  // Charger l’utilisateur connecté
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    currentUser = user;
+
+    // Récupérer username depuis Firestore
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (userDoc.exists) {
+      currentUsername = userDoc.data().username || "Anonyme";
+      usernameDisplay.textContent = currentUsername;
+    } else {
+      usernameDisplay.textContent = "Utilisateur inconnu";
+    }
+
+    // Écouter messages en temps réel
+    db.collection("messages")
+      .orderBy("createdAt")
+      .limit(100)
+      .onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          addMessageToDiv(msg);
+        });
+        // Scroll vers le bas
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+  });
+
+  // Ajouter message à l'affichage
+  function addMessageToDiv(msg) {
+    const div = document.createElement("div");
+    div.classList.add("message");
+    if (msg.uid === currentUser.uid) div.classList.add("self");
+
+    const sender = document.createElement("div");
+    sender.className = "sender";
+    sender.textContent = msg.username;
+
+    const content = document.createElement("div");
+    content.textContent = msg.text;
+
+    div.appendChild(sender);
+    div.appendChild(content);
+    messagesDiv.appendChild(div);
+  }
+
+  // Envoyer un message
+  sendBtn.onclick = async () => {
+    const text = messageInput.value.trim();
+    if (text === "") return;
+
+    sendBtn.disabled = true;
+
+    try {
+      await db.collection("messages").add({
+        uid: currentUser.uid,
+        username: currentUsername,
+        text,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      messageInput.value = "";
+      sendBtn.disabled = true;
+    } catch (error) {
+      alert("Erreur lors de l'envoi : " + error.message);
+    }
+  };
+</script>
+
+</body>
+</html>

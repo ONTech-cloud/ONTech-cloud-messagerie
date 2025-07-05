@@ -1,115 +1,234 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Inscription - ON Tech</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 30px;
-      text-align: center;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      width: 90%;
-      max-width: 300px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #1976d2;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #message {
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - ON Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --secondary-color: #7ED321;
+            --background-light: #F4F7F6;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --border-color: #E0E0E0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-dark);
+        }
+
+        .container {
+            background: var(--text-light);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--text-dark);
+            font-size: 0.95em;
+        }
+
+        .input-group input {
+            width: calc(100% - 24px); /* Adjusted for padding */
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            outline: none;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #3A7BBF; /* Slightly darker primary color */
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #message {
+            margin-top: 25px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            min-height: 20px; /* To prevent layout shift */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        #message.show {
+            opacity: 1;
+        }
+
+        #message.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+        }
+
+        #message.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+        }
+
+        #message.loading {
+            background-color: #e6f7ff;
+            color: #007bff;
+        }
+    </style>
 </head>
 <body>
 
-  <h2>Créer un compte ON Tech</h2>
-  <form onsubmit="registerUser(event)">
-    <input type="text" id="firstName" placeholder="Prénom" required>
-    <input type="text" id="lastName" placeholder="Nom" required>
-    <input type="text" id="username" placeholder="Nom d'utilisateur" required>
-    <input type="date" id="birthdate" placeholder="Date de naissance" required>
-    <input type="email" id="email" placeholder="Adresse email" required>
-    <input type="password" id="password" placeholder="Mot de passe" required>
-    <button type="submit">S'inscrire</button>
-  </form>
+    <div class="container">
+        <h2>Créer un compte ON Tech</h2>
+        <form onsubmit="registerUser(event)">
+            <div class="input-group">
+                <label for="firstName">Prénom</label>
+                <input type="text" id="firstName" placeholder="Votre prénom" required>
+            </div>
+            <div class="input-group">
+                <label for="lastName">Nom</label>
+                <input type="text" id="lastName" placeholder="Votre nom" required>
+            </div>
+            <div class="input-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" placeholder="Choisissez un nom d'utilisateur" required>
+            </div>
+            <div class="input-group">
+                <label for="birthdate">Date de naissance</label>
+                <input type="date" id="birthdate" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Adresse email</label>
+                <input type="email" id="email" placeholder="votre.email@example.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="Minimum 6 caractères" required>
+            </div>
+            <button type="submit">S'inscrire</button>
+        </form>
 
-  <div id="message"></div>
+        <div id="message"></div>
+    </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
-      authDomain: "messagerie-ontech-cloud.firebaseapp.com",
-      projectId: "messagerie-ontech-cloud",
-      storageBucket: "messagerie-ontech-cloud.appspot.com",
-      messagingSenderId: "45424467520",
-      appId: "1:45424467520:web:0d996077888bea6c5f09a5"
-    };
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+            authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+            projectId: "messagerie-ontech-cloud",
+            storageBucket: "messagerie-ontech-cloud.appspot.com",
+            messagingSenderId: "45424467520",
+            appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+        };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    async function registerUser(e) {
-      e.preventDefault();
-      const firstName = document.getElementById('firstName').value.trim();
-      const lastName = document.getElementById('lastName').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const birthdate = document.getElementById('birthdate').value;
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+        async function registerUser(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const birthdate = document.getElementById('birthdate').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
 
-      const messageDiv = document.getElementById("message");
-      messageDiv.innerText = "⏳ Création du compte...";
+            const messageDiv = document.getElementById("message");
+            messageDiv.className = 'loading show';
+            messageDiv.innerText = "⏳ Création du compte...";
 
-      try {
-        // Vérifie si le nom d’utilisateur existe déjà
-        const query = await db.collection("users").where("username", "==", username).get();
-        if (!query.empty) {
-          messageDiv.innerText = "⚠️ Ce nom d'utilisateur est déjà pris.";
-          return;
+            try {
+                // Vérifie si le nom d’utilisateur existe déjà
+                const query = await db.collection("users").where("username", "==", username).get();
+                if (!query.empty) {
+                    messageDiv.className = 'error show';
+                    messageDiv.innerText = "⚠️ Ce nom d'utilisateur est déjà pris.";
+                    return;
+                }
+
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+
+                await db.collection("users").doc(uid).set({
+                    firstName,
+                    lastName,
+                    username,
+                    birthdate,
+                    email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                messageDiv.className = 'success show';
+                messageDiv.innerText = "✅ Compte créé avec succès !";
+            } catch (error) {
+                messageDiv.className = 'error show';
+                messageDiv.innerText = `❌ Erreur : ${error.message}`;
+            }
         }
-
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        const uid = userCredential.user.uid;
-
-        await db.collection("users").doc(uid).set({
-          firstName,
-          lastName,
-          username,
-          birthdate,
-          email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        messageDiv.innerText = "✅ Compte créé avec succès !";
-      } catch (error) {
-        messageDiv.innerText = `❌ Erreur : ${error.message}`;
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>

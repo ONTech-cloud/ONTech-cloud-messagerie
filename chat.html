@@ -1,1163 +1,168 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ON Tech Cloud Messagerie</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        /* Variables CSS pour un thème moderne et doux */
-        :root {
-            --primary-blue: #007bff; /* Bleu vibrant pour les actions principales */
-            --primary-blue-dark: #0056b3; /* Bleu plus foncé au survol */
-            --secondary-green: #28a745; /* Vert pour succès/inscription */
-            --secondary-green-dark: #218838;
-            --background-light: #f8f9fa; /* Arrière-plan très clair */
-            --background-card: #ffffff; /* Fond des cartes/panneaux */
-            --text-dark: #343a40; /* Texte sombre */
-            --text-light: #ffffff; /* Texte clair (sur fond sombre) */
-            --border-color: #dee2e6; /* Bordures subtiles */
-            --shadow-light: rgba(0, 0, 0, 0.05); /* Ombre très légère */
-            --shadow-medium: rgba(0, 0, 0, 0.1); /* Ombre moyenne */
-            --error-red: #dc3545; /* Rouge pour les erreurs */
-            --info-blue-light: #e7f3ff; /* Fond bleu clair pour infos */
-            --message-bg-sender: var(--primary-blue);
-            --message-bg-receiver: #e2e6ea; /* Gris clair pour messages reçus */
-            --pin-color: #ffc107; /* Jaune pour l'épingle */
-            --unread-indicator: #ff7f50; /* Orange corail pour non lu */
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            color: var(--text-dark);
-            overflow: hidden; /* Empêche le défilement du corps principal */
-        }
-
-        /* Conteneur principal pour les deux interfaces */
-        #main-container {
-            width: 95%;
-            max-width: 1200px;
-            height: 90vh;
-            max-height: 800px;
-            background-color: var(--background-card);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px var(--shadow-medium);
-            overflow: hidden;
-            display: flex; /* Utilise flexbox pour le layout enfant */
-            flex-direction: column; /* Par défaut, les sections s'empilent */
-            position: relative; /* Pour positionner correctement les interfaces */
-        }
-
-        /* Styles pour l'interface d'authentification */
-        #auth-section {
-            position: absolute; /* Position absolue pour superposer */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 40px;
-            box-sizing: border-box;
-            text-align: center;
-            background-color: var(--background-card); /* Assure que le fond est blanc */
-            z-index: 10; /* S'assure qu'elle est au-dessus du chat */
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-        }
-
-        #auth-section.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none; /* Empêche les interactions quand caché */
-        }
-
-        #auth-section h2 {
-            color: var(--primary-blue);
-            margin-bottom: 30px;
-            font-weight: 600;
-            font-size: 2.2em;
-        }
-
-        #auth-form {
-            width: 100%;
-            max-width: 380px;
-            margin-top: 20px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-dark);
-            font-size: 0.95em;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box;
-            background-color: var(--background-light);
-            color: var(--text-dark);
-        }
-
-        .input-group input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-            outline: none;
-            background-color: var(--background-card);
-        }
-
-        .auth-button {
-            background-color: var(--primary-blue);
-            color: var(--text-light);
-            border: none;
-            padding: 14px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            width: 100%;
-            margin-top: 15px;
-            letter-spacing: 0.5px;
-        }
-
-        .auth-button:hover {
-            background-color: var(--primary-blue-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px var(--shadow-medium);
-        }
-
-        .auth-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px var(--shadow-light);
-        }
-
-        #registerButton {
-            background-color: var(--secondary-green);
-        }
-        #registerButton:hover {
-            background-color: var(--secondary-green-dark);
-        }
-
-        /* Messages de statut pour l'authentification */
-        .message-status {
-            margin-top: 25px;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 500;
-            min-height: 20px;
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-align: center;
-            width: 100%;
-            max-width: 380px;
-            box-sizing: border-box;
-        }
-        .message-status.show {
-            opacity: 1;
-        }
-        .message-status.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .message-status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .message-status.info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-
-        /* --- Interface de Chat --- */
-        #chat-interface {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            visibility: hidden;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-        }
-
-        #chat-interface.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Sidebar pour les conversations */
-        .sidebar {
-            width: 320px;
-            min-width: 280px;
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            background-color: var(--background-light);
-            padding-bottom: 70px; /* Espace pour le bouton de déconnexion flottant */
-            position: relative;
-        }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--background-card);
-        }
-
-        .sidebar-header h3 {
-            margin: 0;
-            color: var(--primary-blue);
-            font-size: 1.5em;
-            font-weight: 600;
-        }
-
-        #start-new-chat-button {
-            background: none;
-            border: none;
-            font-size: 1.7em;
-            cursor: pointer;
-            color: var(--secondary-green);
-            transition: color 0.2s ease, transform 0.2s ease;
-            width: auto; /* Annule la largeur 100% du bouton générique */
-            margin: 0; /* Annule les marges du bouton générique */
-            padding: 0;
-        }
-        #start-new-chat-button:hover {
-            color: var(--secondary-green-dark);
-            transform: scale(1.1);
-        }
-
-        .conversation-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 0px; /* Padding ajusté */
-        }
-
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease;
-            position: relative;
-        }
-
-        .conversation-item:hover {
-            background-color: #e9ecef;
-        }
-        .conversation-item.active {
-            background-color: var(--primary-blue);
-            color: var(--text-light);
-            font-weight: 500;
-        }
-        .conversation-item.active span {
-            color: var(--text-light); /* Assure le texte blanc */
-        }
-        .conversation-item.active .pin-icon {
-            color: var(--pin-color); /* L'étoile reste jaune */
-        }
-
-        .conversation-item.unread {
-            font-weight: 600;
-            background-color: var(--info-blue-light);
-        }
-        .conversation-item.unread .unread-dot {
-            display: block;
-            width: 10px;
-            height: 10px;
-            background-color: var(--unread-indicator);
-            border-radius: 50%;
-            margin-left: auto; /* Pousse le point à droite */
-            flex-shrink: 0;
-        }
-        .conversation-item:not(.unread) .unread-dot {
-            display: none;
-        }
-
-        .conversation-item.pinned .pin-icon {
-            color: var(--pin-color);
-            margin-right: 8px;
-            display: inline-block;
-        }
-        .conversation-item:not(.pinned) .pin-icon {
-            display: none;
-        }
-
-        .conversation-item span {
-            flex-grow: 1;
-            font-size: 1.05em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text-dark); /* Couleur par défaut */
-        }
-
-        #logout-button {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: var(--error-red);
-            color: var(--text-light);
-            border-radius: 0; /* Pas de bordure arrondie en bas */
-            padding: 15px;
-            font-size: 1em;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-            box-shadow: 0 -2px 10px var(--shadow-light);
-            z-index: 1; /* S'assure qu'il est au-dessus du scroll */
-            margin-top: 0; /* Annule la marge du bouton générique */
-        }
-
-        #logout-button:hover {
-            background-color: #c82333;
-            transform: translateY(0); /* Empêche le décalage hover */
-            box-shadow: 0 -4px 12px var(--shadow-medium);
-        }
-
-        /* --- Chat Main Area --- */
-        .chat-main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--background-card);
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 25px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--background-card);
-            box-shadow: 0 2px 5px var(--shadow-light);
-        }
-
-        .chat-header h4 {
-            margin: 0;
-            font-size: 1.4em;
-            font-weight: 600;
-            color: var(--text-dark);
-            flex-grow: 1;
-        }
-
-        .pin-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.8em;
-            color: #ccc;
-            transition: color 0.2s ease;
-            margin-left: 20px;
-            padding: 0;
-            width: auto;
-            margin-top: 0; /* Annule les marges du bouton générique */
-        }
-
-        .pin-button.pinned {
-            color: var(--pin-color);
-        }
-
-        .pin-button:hover {
-            color: var(--pin-color); /* Garde la couleur de l'épingle */
-            transform: scale(1.1);
-        }
-
-        .messages-container {
-            flex-grow: 1;
-            padding: 20px 25px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 20px;
-            line-height: 1.4;
-            word-wrap: break-word;
-            box-shadow: 0 1px 3px var(--shadow-light);
-        }
-
-        .message.sender {
-            align-self: flex-end;
-            background-color: var(--message-bg-sender);
-            color: var(--text-light);
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.receiver {
-            align-self: flex-start;
-            background-color: var(--message-bg-receiver);
-            color: var(--text-dark);
-            border-bottom-left-radius: 4px;
-        }
-
-        .message-timestamp {
-            font-size: 0.7em;
-            color: rgba(255,255,255,0.8);
-            margin-top: 5px;
-            text-align: right;
-            opacity: 0.8;
-        }
-        .message.receiver .message-timestamp {
-            color: #6c757d;
-            text-align: left;
-        }
-
-        .message-input-area {
-            display: flex;
-            padding: 15px 25px;
-            border-top: 1px solid var(--border-color);
-            background-color: var(--background-card);
-        }
-
-        .message-input-area input {
-            flex-grow: 1;
-            padding: 12px 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 25px;
-            font-size: 1em;
-            margin-right: 10px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box;
-            background-color: var(--background-light);
-        }
-
-        .message-input-area input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-            outline: none;
-            background-color: var(--background-card);
-        }
-
-        .message-input-area button {
-            background-color: var(--primary-blue);
-            color: var(--text-light);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            white-space: nowrap;
-            width: auto;
-            margin-top: 0;
-        }
-
-        .message-input-area button:hover {
-            background-color: var(--primary-blue-dark);
-            transform: translateY(-1px);
-        }
-
-        /* --- Scrollbar Customization --- */
-        ::-webkit-scrollbar {
-            width: 8px;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #e9ecef; /* Lighter track */
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #adb5bd; /* Medium grey thumb */
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6c757d; /* Darker grey on hover */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ON Tech - Messagerie</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #007bff;
+      --error-red: #e74c3c;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .hidden { display: none; }
+    .active { display: flex; }
+    #auth-section, #chat-interface {
+      padding: 20px;
+    }
+    #chat-interface {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #conversation-list {
+      overflow-y: auto;
+      max-height: 200px;
+      border-bottom: 1px solid #ccc;
+    }
+    .conversation-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .conversation-item.active {
+      background-color: #e6f0ff;
+    }
+    .conversation-item.unread .unread-dot {
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 5px;
+    }
+    .conversation-item .pin-icon {
+      margin-right: 8px;
+      color: gold;
+    }
+    #messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background-color: white;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    .sender {
+      background-color: #d1e7ff;
+      align-self: flex-end;
+    }
+    .receiver {
+      background-color: #e2e2e2;
+      align-self: flex-start;
+    }
+    .message-timestamp {
+      font-size: 0.8em;
+      color: #666;
+      text-align: right;
+    }
+    #message-input {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #pin-toggle-button {
+      display: none;
+    }
+    .pinned i { color: gold; }
+    .message-status {
+      padding: 10px;
+      margin: 10px 0;
+      text-align: center;
+      border-radius: 5px;
+      display: none;
+    }
+    .message-status.info {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    .message-status.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .message-status.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .message-status.show {
+      display: block;
+    }
+  </style>
 </head>
 <body>
+  <div id="auth-section">
+    <form id="auth-form">
+      <h2>Connexion / Inscription</h2>
+      <input type="email" id="authEmail" placeholder="Email" required><br>
+      <input type="password" id="authPassword" placeholder="Mot de passe" required><br>
+      <button type="submit" id="loginButton">Connexion</button>
+      <button type="button" id="registerButton">Inscription</button>
+    </form>
+    <div id="auth-message" class="message-status"></div>
+  </div>
 
-    <div id="main-container">
-        <div id="auth-section">
-            <h2>Bienvenue sur ON Tech Cloud Messagerie</h2>
-            <form id="auth-form">
-                <div class="input-group">
-                    <label for="authEmail">Adresse email</label>
-                    <input type="email" id="authEmail" placeholder="votre.email@example.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="authPassword">Mot de passe</label>
-                    <input type="password" id="authPassword" placeholder="Minimum 6 caractères" required>
-                </div>
-                <button type="submit" id="loginButton" class="auth-button">Se connecter</button>
-                <button type="button" id="registerButton" class="auth-button">S'inscrire</button>
-            </form>
-            <div id="auth-message" class="message-status"></div>
-        </div>
-
-        <div id="chat-interface">
-            <div class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Conversations</h3>
-                    <button id="start-new-chat-button" title="Démarrer une nouvelle conversation">
-                        <i class="fas fa-plus-circle"></i>
-                    </button>
-                </div>
-                <div class="conversation-list" id="conversation-list">
-                    <p style="text-align: center; color: #888; padding: 20px;">
-                        Aucune conversation pour le moment.<br>
-                        Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.
-                    </p>
-                </div>
-                <button id="logout-button">Se déconnecter</button>
-            </div>
-
-            <div class="chat-main">
-                <div class="chat-header">
-                    <h4 id="current-chat-name">Sélectionnez une conversation</h4>
-                    <button id="pin-toggle-button" class="pin-button" title="Épingler/Désépingler la conversation" style="display: none;">
-                        <i class="fas fa-star"></i>
-                    </button>
-                </div>
-                <div class="messages-container" id="messages-container">
-                    <p style="text-align: center; color: #888; padding-top: 50px;">
-                        Bienvenue dans votre chat ON Tech!<br>
-                        Sélectionnez une conversation pour commencer ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une nouvelle.
-                    </p>
-                </div>
-                <div class="message-input-area">
-                    <input type="text" id="message-input" placeholder="Écrire un message..." disabled>
-                    <button id="send-message-button" disabled><i class="fas fa-paper-plane"></i> Envoyer</button>
-                </div>
-            </div>
-        </div>
+  <div id="chat-interface">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 id="current-chat-name">Sélectionnez une conversation</h2>
+      <div>
+        <button id="start-new-chat-button" title="Nouvelle conversation"><i class="fas fa-plus-circle"></i></button>
+        <button id="pin-toggle-button" title="Épingler"><i class="fas fa-star"></i></button>
+        <button id="logout-button" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-    <script>
-        // Configuration Firebase (UTILISEZ VOS PROPRES CLÉS SECRÈTES !)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
-            authDomain: "messagerie-ontech-cloud.firebaseapp.com",
-            projectId: "messagerie-ontech-cloud",
-            storageBucket: "messagerie-ontech-cloud.appspot.com",
-            messagingSenderId: "45424467520",
-            appId: "1:45424467520:web:0d996077888bea6c5f09a5"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Références DOM
-        const authSection = document.getElementById('auth-section');
-        const authForm = document.getElementById('auth-form');
-        const authEmailInput = document.getElementById('authEmail');
-        const authPasswordInput = document.getElementById('authPassword');
-        const loginButton = document.getElementById('loginButton');
-        const registerButton = document.getElementById('registerButton');
-        const authMessageDiv = document.getElementById('auth-message');
-
-        const chatInterface = document.getElementById('chat-interface');
-        const conversationListDiv = document.getElementById('conversation-list');
-        const startNewChatButton = document.getElementById('start-new-chat-button');
-        const logoutButton = document.getElementById('logout-button');
-
-        const currentChatName = document.getElementById('current-chat-name');
-        const messagesContainer = document.getElementById('messages-container');
-        const messageInput = document.getElementById('message-input');
-        const sendMessageButton = document.getElementById('send-message-button');
-        const pinToggleButton = document.getElementById('pin-toggle-button');
-
-        let currentUser = null;
-        let currentUserData = null; // Données Firestore de l'utilisateur actuel
-        let currentChatId = null;
-        let currentChatPartnerId = null;
-        let unsubscribeMessages = null; // Listener de messages Firestore
-        let unsubscribeUserChats = null; // Listener des conversations de l'utilisateur
-        let unreadMessagesTracker = {}; // { chatId: true/false }
-
-        // Cache des noms d'utilisateur pour éviter des lectures répétées
-        const usernameCache = {};
-
-        // URLs de redirection exactes
-        const REGISTER_REDIRECT_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/register.html";
-        const LOGIN_REDIRECT_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/login.html";
-
-
-        // --- Fonctions d'aide pour l'affichage des messages d'état ---
-        function displayAuthMessage(text, type) {
-            authMessageDiv.innerText = text;
-            authMessageDiv.className = `message-status show ${type}`;
-            setTimeout(() => {
-                authMessageDiv.classList.remove('show');
-            }, 5000); // Reste visible plus longtemps
-        }
-
-        // --- Authentification ---
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = authEmailInput.value.trim();
-            const password = authPasswordInput.value;
-
-            displayAuthMessage("Connexion en cours...", "info");
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-                // onAuthStateChanged va gérer l'affichage de l'interface chat
-            } catch (error) {
-                displayAuthMessage(`Erreur de connexion: ${error.message}`, "error");
-            }
-        });
-
-        registerButton.addEventListener('click', async () => {
-            const email = authEmailInput.value.trim();
-            const password = authPasswordInput.value;
-
-            if (!email || !password || password.length < 6) {
-                displayAuthMessage("Veuillez entrer un email valide et un mot de passe d'au moins 6 caractères.", "error");
-                return;
-            }
-
-            displayAuthMessage("Inscription en cours...", "info");
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                currentUser = userCredential.user;
-
-                // Enregistrement des infos utilisateur dans Firestore
-                await db.collection("users").doc(currentUser.uid).set({
-                    email: email,
-                    username: email.split('@')[0], // Pseudo par défaut
-                    pinnedChats: [] // Initialise les conversations épinglées
-                });
-                
-                displayAuthMessage("Inscription réussie! Redirection...", "success");
-                setTimeout(() => {
-                    window.location.href = REGISTER_REDIRECT_URL; // Rediriger après l'inscription
-                }, 1500); // Court délai pour que l'utilisateur voie le message de succès
-
-            } catch (error) {
-                displayAuthMessage(`Erreur d'inscription: ${error.message}`, "error");
-            }
-        });
-
-        logoutButton.addEventListener('click', async () => {
-            try {
-                // S'assurer que tous les listeners Firestore sont désactivés avant de déconnecter
-                if (unsubscribeMessages) unsubscribeMessages();
-                if (unsubscribeUserChats) unsubscribeUserChats();
-                
-                await auth.signOut();
-                console.log("Utilisateur déconnecté.");
-                window.location.href = LOGIN_REDIRECT_URL; // Rediriger vers la page de connexion
-            } catch (error) {
-                console.error("Erreur de déconnexion:", error);
-                alert("Erreur lors de la déconnexion: " + error.message);
-            }
-        });
-
-        // --- Initialisation du Chat après connexion ---
-        async function initializeChat() {
-            authSection.classList.add('hidden'); // Cache la section d'authentification
-            chatInterface.classList.add('active'); // Affiche l'interface de chat
-            requestNotificationPermission(); // Demander la permission de notification
-
-            // Écoute les changements dans les infos de l'utilisateur (pour les chats épinglés et le pseudo)
-            if (unsubscribeUserChats) {
-                unsubscribeUserChats(); // Désabonner l'ancien listener si présent
-            }
-            unsubscribeUserChats = db.collection("users").doc(currentUser.uid).onSnapshot(doc => {
-                if (doc.exists) {
-                    currentUserData = doc.data(); // Stocke les données utilisateur
-                    loadConversations(); // Recharger les conversations pour refléter les épinglés ou nouveaux pseudos
-                } else {
-                    console.warn("Document utilisateur non trouvé pour ID:", currentUser.uid);
-                    // Si le document utilisateur disparaît de manière inattendue, déconnecter
-                    auth.signOut(); 
-                }
-            }, error => {
-                console.error("Erreur d'écoute des données utilisateur:", error);
-            });
-
-
-            // Écoute les nouveaux messages pour toutes les conversations de l'utilisateur (pour les notifications et le badge non lu)
-            db.collection("chats")
-                .where("participants", "array-contains", currentUser.uid)
-                .orderBy("updatedAt", "desc") 
-                .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(async change => {
-                        const chatData = change.doc.data();
-                        const chatId = change.doc.id;
-
-                        const partnerId = chatData.participants.find(p => p !== currentUser.uid);
-
-                        // Si c'est un nouveau message ou une mise à jour et que l'utilisateur n'est PAS sur ce chat
-                        // et que le message ne vient pas de l'utilisateur actuel
-                        if (chatId !== currentChatId && chatData.lastMessage && chatData.lastMessage.senderId !== currentUser.uid) {
-                            if (!unreadMessagesTracker[chatId]) { 
-                                unreadMessagesTracker[chatId] = true;
-                                loadConversations(); // Rafraîchir pour afficher l'indicateur "non lu"
-                                await showNewMessageNotification(chatId, chatData.lastMessage.text, partnerId);
-                            }
-                        } else if (chatId === currentChatId) {
-                             // Si l'utilisateur est sur la conversation, la marquer comme lue
-                             if (unreadMessagesTracker[chatId]) { // Seulement si elle était non lue
-                                 unreadMessagesTracker[chatId] = false;
-                                 loadConversations(); // Pour enlever l'indicateur non lu de la liste
-                             }
-                        }
-                    });
-                }, error => console.error("Erreur d'écoute des chats pour les mises à jour globales:", error));
-            
-            // Premier chargement des conversations
-            loadConversations(); 
-        }
-
-        // --- Demande de permission de notification ---
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            console.log("Permission de notification accordée.");
-                        } else {
-                            console.warn("Permission de notification refusée ou ignorée.");
-                        }
-                    });
-                }
-            }
-        }
-
-        // --- Afficher une notification pour les nouveaux messages ---
-        async function showNewMessageNotification(chatId, messageText, partnerId) {
-            if (Notification.permission === "granted" && chatId !== currentChatId) { 
-                let partnerName = usernameCache[partnerId];
-                if (!partnerName) {
-                    const partnerDoc = await db.collection("users").doc(partnerId).get();
-                    if (partnerDoc.exists) {
-                        partnerName = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
-                        usernameCache[partnerId] = partnerName; 
-                    } else {
-                        partnerName = "Utilisateur Inconnu";
-                    }
-                }
-
-                new Notification(`Nouveau message de ${partnerName}`, {
-                    body: messageText,
-                    icon: 'https://via.placeholder.com/64/007bff/FFFFFF?text=ON', // Icône simple
-                    tag: chatId, 
-                    renotify: true 
-                });
-            }
-        }
-
-
-        // --- Charger la liste des conversations ---
-        async function loadConversations() {
-            if (!currentUser) {
-                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Veuillez vous connecter pour voir vos conversations.</p>';
-                return;
-            }
-            if (!currentUserData) {
-                 conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement de votre profil utilisateur...</p>';
-                 return;
-            }
-
-            conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement des conversations...</p>';
-
-            try {
-                const userChatsSnapshot = await db.collection("chats")
-                    .where("participants", "array-contains", currentUser.uid)
-                    .orderBy("updatedAt", "desc") 
-                    .get();
-
-                const conversations = [];
-                const partnerIdsToFetch = new Set();
-
-                userChatsSnapshot.forEach(doc => {
-                    const chatData = doc.data();
-                    const chatId = doc.id;
-                    const partnerId = chatData.participants.find(p => p !== currentUser.uid);
-                    if (partnerId) {
-                        partnerIdsToFetch.add(partnerId);
-                        conversations.push({
-                            chatId,
-                            partnerId,
-                            lastMessageTimestamp: chatData.updatedAt ? chatData.updatedAt.toDate() : new Date(0),
-                            isPinned: currentUserData.pinnedChats && currentUserData.pinnedChats.includes(chatId),
-                            isUnread: unreadMessagesTracker[chatId] || false 
-                        });
-                    }
-                });
-
-                // Récupérer les noms d'utilisateur des partenaires en une seule fois
-                await Promise.all(Array.from(partnerIdsToFetch).map(async (pId) => {
-                    if (!usernameCache[pId]) {
-                        const partnerDoc = await db.collection("users").doc(pId).get();
-                        if (partnerDoc.exists) {
-                            usernameCache[pId] = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
-                        } else {
-                            usernameCache[pId] = "Utilisateur Inconnu";
-                        }
-                    }
-                }));
-
-                // Trier: épinglées d'abord, puis par date du dernier message
-                conversations.sort((a, b) => {
-                    if (a.isPinned && !b.isPinned) return -1;
-                    if (!a.isPinned && b.isPinned) return 1;
-                    return b.lastMessageTimestamp - a.lastMessageTimestamp;
-                });
-
-                conversationListDiv.innerHTML = ''; // Vide la liste avant de la remplir
-                if (conversations.length === 0) {
-                    conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
-                } else {
-                    conversations.forEach(conv => {
-                        const partnerName = usernameCache[conv.partnerId];
-                        const itemHtml = `
-                            <div class="conversation-item ${conv.chatId === currentChatId ? 'active' : ''} ${conv.isUnread ? 'unread' : ''} ${conv.isPinned ? 'pinned' : ''}" data-chat-id="${conv.chatId}" data-partner-id="${conv.partnerId}">
-                                <span class="pin-icon"><i class="fas fa-star"></i></span>
-                                <span>${partnerName}</span>
-                                <span class="unread-dot"></span>
-                            </div>
-                        `;
-                        conversationListDiv.insertAdjacentHTML('beforeend', itemHtml);
-                    });
-                }
-                
-                attachConversationClickListeners();
-
-            } catch (error) {
-                console.error("Erreur de chargement des conversations:", error);
-                conversationListDiv.innerHTML = '<p style="text-align: center; color: var(--error-red); padding: 20px;">Erreur de chargement des conversations.<br>Vérifiez vos règles de sécurité Firebase Firestore.</p>';
-            }
-        }
-
-
-        // --- Attacher les listeners aux conversations ---
-        function attachConversationClickListeners() {
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.onclick = () => selectConversation(item.dataset.chatId, item.dataset.partnerId);
-            });
-        }
-
-        // --- Sélectionner une conversation ---
-        async function selectConversation(chatId, partnerId) {
-            if (!currentUser) return; 
-
-            // Désélectionner l'ancienne conversation active
-            const prevActive = document.querySelector('.conversation-item.active');
-            if (prevActive) {
-                prevActive.classList.remove('active');
-            }
-
-            // Mettre à jour la nouvelle conversation comme active et marquer comme lue
-            const currentActive = document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`);
-            if (currentActive) {
-                currentActive.classList.add('active');
-                currentActive.classList.remove('unread'); 
-                unreadMessagesTracker[chatId] = false; 
-            }
-
-            currentChatId = chatId;
-            currentChatPartnerId = partnerId;
-            messageInput.disabled = false;
-            sendMessageButton.disabled = false;
-            pinToggleButton.style.display = 'block'; 
-
-            // Récupérer le nom du partenaire (si pas déjà en cache)
-            let partnerName = usernameCache[partnerId];
-            if (!partnerName) {
-                const partnerDoc = await db.collection("users").doc(partnerId).get();
-                if (partnerDoc.exists) {
-                    partnerName = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
-                    usernameCache[partnerId] = partnerName; 
-                } else {
-                    partnerName = "Utilisateur Inconnu";
-                }
-            }
-            currentChatName.innerText = partnerName;
-
-            // Mettre à jour l'état du bouton d'épinglage
-            if (currentUserData && currentUserData.pinnedChats && currentUserData.pinnedChats.includes(chatId)) {
-                pinToggleButton.classList.add('pinned');
-            } else {
-                pinToggleButton.classList.remove('pinned');
-            }
-
-            // Désabonner l'ancien listener de messages si existant
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-            }
-
-            messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Chargement des messages...</p>';
-
-            // Écouter les messages pour la conversation sélectionnée
-            unsubscribeMessages = db.collection("chats").doc(chatId)
-                .collection("messages")
-                .orderBy("timestamp")
-                .onSnapshot(snapshot => {
-                    messagesContainer.innerHTML = '';
-                    if (snapshot.empty) {
-                        messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Aucun message dans cette conversation. Soyez le premier !</p>';
-                    } else {
-                        snapshot.forEach(doc => {
-                            const message = doc.data();
-                            const isSender = message.senderId === currentUser.uid;
-                            const messageDiv = document.createElement('div');
-                            messageDiv.classList.add('message');
-                            messageDiv.classList.add(isSender ? 'sender' : 'receiver');
-                            
-                            let timeString = '';
-                            if (message.timestamp) {
-                                if (typeof message.timestamp.toDate === 'function') {
-                                    timeString = new Date(message.timestamp.toDate()).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-                                } else {
-                                    timeString = 'Envoyé...'; 
-                                }
-                            }
-                            
-                            messageDiv.innerHTML = `
-                                ${message.text}
-                                <div class="message-timestamp">${timeString}</div>
-                            `;
-                            messagesContainer.appendChild(messageDiv);
-                        });
-                    }
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight; 
-                }, error => {
-                    console.error("Erreur de chargement des messages:", error);
-                    messagesContainer.innerHTML = '<p style="text-align: center; color: var(--error-red); padding: 50px;">Erreur de chargement des messages.<br>Vérifiez vos règles de sécurité Firebase Firestore.</p>';
-                });
-        }
-
-        // --- Envoyer un message ---
-        sendMessageButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { // Empêche le saut de ligne sur Enter
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        async function sendMessage() {
-            const messageText = messageInput.value.trim();
-            if (messageText === "" || !currentChatId || !currentUser) {
-                return;
-            }
-
-            const message = {
-                senderId: currentUser.uid,
-                text: messageText,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                const chatRef = db.collection("chats").doc(currentChatId);
-                const messagesRef = chatRef.collection("messages");
-
-                await messagesRef.add(message);
-
-                await chatRef.set({
-                    lastMessage: {
-                        senderId: message.senderId,
-                        text: message.text,
-                        timestamp: message.timestamp
-                    },
-                    participants: [currentUser.uid, currentChatPartnerId], 
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }); 
-
-                messageInput.value = '';
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            } catch (error) {
-                console.error("Erreur lors de l'envoi du message:", error);
-                alert("Erreur lors de l'envoi du message : " + error.message + ".");
-            }
-        }
-
-        // --- Gérer l'épinglage/désépinglage ---
-        pinToggleButton.addEventListener('click', async () => {
-            if (!currentUser || !currentChatId || !currentUserData) return;
-
-            const userRef = db.collection("users").doc(currentUser.uid);
-            let pinnedChats = currentUserData.pinnedChats || [];
-
-            if (pinnedChats.includes(currentChatId)) {
-                // Désépingler
-                pinnedChats = pinnedChats.filter(id => id !== currentChatId);
-                pinToggleButton.classList.remove('pinned');
-            } else {
-                // Épingler
-                pinnedChats.push(currentChatId);
-                pinToggleButton.classList.add('pinned');
-            }
-
-            try {
-                await userRef.update({ pinnedChats: pinnedChats });
-                currentUserData.pinnedChats = pinnedChats; 
-                console.log(`Chat ${currentChatId} épinglé/désépinglé.`);
-                loadConversations(); // Recharger pour refléter le changement d'ordre
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour de l'épinglage:", error);
-                alert("Impossible de mettre à jour l'épinglage : " + error.message + ".");
-            }
-        });
-
-
-        // --- Démarrer une nouvelle conversation (simulée pour l'exemple) ---
-        startNewChatButton.addEventListener('click', async () => {
-            if (!currentUser) {
-                alert("Veuillez vous connecter pour démarrer une nouvelle conversation.");
-                return;
-            }
-
-            const targetEmail = prompt("Entrez l'adresse email de l'utilisateur avec qui vous voulez discuter:");
-            if (!targetEmail || targetEmail.trim() === "") {
-                return;
-            }
-
-            if (targetEmail.trim().toLowerCase() === currentUser.email.toLowerCase()) {
-                alert("Vous ne pouvez pas discuter avec vous-même !");
-                return;
-            }
-
-            try {
-                // 1. Trouver l'utilisateur cible par son email
-                const usersRef = db.collection("users");
-                const querySnapshot = await usersRef.where("email", "==", targetEmail.trim().toLowerCase()).limit(1).get();
-
-                if (querySnapshot.empty) {
-                    alert("Aucun utilisateur trouvé avec cet email.");
-                    return;
-                }
-
-                const targetUserDoc = querySnapshot.docs[0];
-                const targetUserId = targetUserDoc.id;
-                const targetUsername = targetUserDoc.data().username || targetUserDoc.data().email.split('@')[0];
-
-                // 2. Vérifier si une conversation existe déjà entre les deux utilisateurs
-                // Important: les IDs doivent être triés pour garantir l'unicité de la paire de participants
-                const participants = [currentUser.uid, targetUserId].sort(); 
-                const existingChatsSnapshot = await db.collection("chats")
-                    .where("participants", "==", participants)
-                    .limit(1)
-                    .get();
-
-                let chatId;
-                if (!existingChatsSnapshot.empty) {
-                    // Conversation existante
-                    chatId = existingChatsSnapshot.docs[0].id;
-                    console.log("Conversation existante trouvée:", chatId);
-                } else {
-                    // Créer une nouvelle conversation
-                    const newChatRef = await db.collection("chats").add({
-                        participants: participants,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastMessage: { text: "Nouvelle conversation", senderId: "system", timestamp: firebase.firestore.FieldValue.serverTimestamp() }
-                    });
-                    chatId = newChatRef.id;
-                    console.log("Nouvelle conversation créée:", chatId);
-                }
-
-                // Sélectionner la conversation nouvellement trouvée ou créée
-                selectConversation(chatId, targetUserId);
-                alert(`Conversation avec ${targetUsername} ouverte !`);
-
-            } catch (error) {
-                console.error("Erreur lors de la création/recherche de conversation:", error);
-                alert("Impossible de démarrer la conversation: " + error.message + ".");
-            }
-        });
-
-
-        // --- Vérifier l'état de l'authentification au chargement de la page ---
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                try {
-                    const doc = await db.collection("users").doc(currentUser.uid).get();
-                    if (doc.exists) {
-                        currentUserData = doc.data();
-                        initializeChat(); // L'utilisateur est connecté et ses données sont chargées
-                    } else {
-                        // Cas rare: utilisateur authentifié mais pas de doc dans 'users'
-                        console.warn("Document utilisateur manquant pour un utilisateur authentifié. Création du profil.");
-                        await db.collection("users").doc(currentUser.uid).set({
-                            email: currentUser.email,
-                            username: currentUser.email.split('@')[0],
-                            pinnedChats: []
-                        });
-                        currentUserData = { email: currentUser.email, username: currentUser.email.split('@')[0], pinnedChats: [] };
-                        initializeChat();
-                    }
-                } catch (error) {
-                    console.error("Erreur de chargement des données utilisateur au démarrage:", error);
-                    // Si erreur de permission ici, c'est un problème de règles Firestore
-                    displayAuthMessage("Erreur de chargement de votre profil. Veuillez vous reconnecter et vérifier vos règles Firestore.", "error");
-                    await auth.signOut(); // Force la déconnexion
-                }
-            } else {
-                // Pas d'utilisateur connecté
-                currentUser = null;
-                currentUserData = null;
-                currentChatId = null;
-                currentChatPartnerId = null;
-                // Désabonner tous les listeners en cas de déconnexion
-                if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
-                if (unsubscribeUserChats) { unsubscribeUserChats(); unsubscribeUserChats = null; }
-                usernameCache = {}; 
-                unreadMessagesTracker = {};
-
-                authSection.classList.remove('hidden'); // Affiche l'interface d'authentification
-                chatInterface.classList.remove('active'); // Cache l'interface de chat
-
-                authForm.reset(); // Réinitialise les champs du formulaire
-                authPasswordInput.value = ''; // Assure que le mot de passe est vide
-                
-                // Réinitialiser les messages du chat
-                messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Bienvenue dans votre chat ON Tech!<br>Sélectionnez une conversation pour commencer ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une nouvelle.</p>';
-                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
-                currentChatName.innerText = "Sélectionnez une conversation";
-                pinToggleButton.style.display = 'none';
-                messageInput.disabled = true;
-                sendMessageButton.disabled = true;
-                displayAuthMessage("Veuillez vous connecter ou vous inscrire pour continuer.", "info");
-            }
-        });
-    </script>
+    <div id="conversation-list"></div>
+    <div id="messages-container">
+      <p style="text-align: center; color: #888; padding-top: 50px;">
+        Bienvenue dans votre chat ON Tech!<br>
+        Sélectionnez une conversation ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.
+      </p>
+    </div>
+    <textarea id="message-input" placeholder="Tapez votre message..." disabled></textarea>
+    <button id="send-message-button" disabled>Envoyer</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- Initialisation Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "TA_CLE_API",
+      authDomain: "TON_PROJET.firebaseapp.com",
+      projectId: "TON_PROJET",
+      storageBucket: "TON_PROJET.appspot.com",
+      messagingSenderId: "TON_ID",
+      appId: "TON_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Logique de chat -->
+  <script src="chat.js"></script>
 </body>
 </html>

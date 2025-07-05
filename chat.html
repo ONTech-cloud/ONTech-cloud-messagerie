@@ -1,150 +1,1090 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Messagerie ON Tech</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f2f4f8;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    #sidebar {
-      width: 300px;
-      background-color: #fff;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-    }
-    #conversationList {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-    .conversation-item {
-      padding: 12px;
-      margin-bottom: 6px;
-      background-color: #f7f9fc;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
-    .conversation-item:hover {
-      background-color: #e1e9f0;
-    }
-    .conversation-item.active {
-      background-color: #d0e4ff;
-    }
-    .conversation-item.unread .unread-dot::after {
-      content: " ";
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: #ff3b3b;
-      border-radius: 50%;
-      margin-left: 8px;
-    }
-    .conversation-item.pinned {
-      font-weight: bold;
-    }
-    .pin-icon i {
-      color: gold;
-      margin-right: 8px;
-    }
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    #messagesContainer {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: #ffffff;
-    }
-    .message {
-      max-width: 70%;
-      padding: 10px 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      position: relative;
-    }
-    .sender {
-      background: #e1f3ff;
-      align-self: flex-end;
-      margin-left: auto;
-    }
-    .receiver {
-      background: #f0f0f0;
-      align-self: flex-start;
-    }
-    .message-timestamp {
-      font-size: 0.75rem;
-      color: #888;
-      margin-top: 4px;
-      text-align: right;
-    }
-    #chatInput {
-      display: flex;
-      padding: 10px;
-      background: #fff;
-      border-top: 1px solid #ddd;
-    }
-    #messageInput {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin-right: 10px;
-    }
-    #sendMessageButton {
-      padding: 10px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #sendMessageButton:disabled {
-      background: #a0cfff;
-    }
-    .info-text, .error-text {
-      text-align: center;
-      color: #666;
-      padding: 20px;
-    }
-    .error-text {
-      color: #c00;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat ON Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4A90E2; /* Bleu principal */
+            --primary-hover-color: #3A7BBF; /* Bleu plus foncé au survol */
+            --secondary-color: #7ED321; /* Vert pour les éléments secondaires ou accents */
+            --background-light: #F4F7F6; /* Arrière-plan général clair */
+            --background-darker: #E9EBED; /* Arrière-plan légèrement plus foncé */
+            --text-dark: #333333; /* Couleur de texte sombre */
+            --text-light: #FFFFFF; /* Couleur de texte clair */
+            --border-color: #E0E0E0; /* Couleur des bordures */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Ombre légère */
+            --shadow-medium: rgba(0, 0, 0, 0.15); /* Ombre moyenne */
+            --message-bg-sender: var(--primary-color);
+            --message-bg-receiver: #F0F0F0;
+            --unread-indicator: #FF5722; /* Rouge-orangé pour non lu */
+            --pin-color: #FFC107; /* Jaune pour épingle */
+            --logout-button-color: #f44336; /* Rouge pour déconnexion */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-dark);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        #auth-section {
+            background: var(--text-light);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        #chat-interface {
+            display: none; /* Caché par défaut, affiché après connexion */
+            background: var(--text-light);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            max-height: 800px;
+            display: flex;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 1.8em;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--text-dark);
+            font-size: 0.95em;
+            user-select: none;
+        }
+
+        .input-group input {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        .input-group input::placeholder {
+            color: #A0A0A0;
+            opacity: 0.8;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            outline: none;
+            background-color: var(--text-light);
+        }
+
+        button {
+            background: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: var(--primary-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Sidebar (Liste des conversations) --- */
+        .sidebar {
+            width: 350px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-darker);
+            position: relative; /* Pour le bouton déconnexion */
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .conversation-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+
+        .conversation-item:hover, .conversation-item.active {
+            background-color: var(--background-light);
+        }
+
+        .conversation-item.unread {
+            font-weight: 600;
+            background-color: #EBF5FF;
+        }
+
+        .conversation-item.unread .unread-dot {
+            display: block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--unread-indicator);
+            border-radius: 50%;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+        .conversation-item:not(.unread) .unread-dot {
+            display: none;
+        }
+
+        .conversation-item.pinned .pin-icon {
+            color: var(--pin-color);
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .conversation-item:not(.pinned) .pin-icon {
+            display: none;
+        }
+
+        .conversation-item span {
+            flex-grow: 1;
+            font-size: 1.05em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        #logout-button {
+            background-color: var(--logout-button-color);
+            color: var(--text-light);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            width: auto;
+            margin-top: 0;
+        }
+
+        #logout-button:hover {
+            background-color: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        /* --- Chat Main Area --- */
+        .chat-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--text-light);
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
+        .chat-header h4 {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-color);
+            flex-grow: 1; /* Permet au titre de prendre l'espace */
+            text-align: left;
+        }
+
+        .pin-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ccc;
+            transition: color 0.2s ease;
+            margin-left: 20px; /* Ajoute un espace à gauche */
+            flex-shrink: 0; /* Empêche le bouton de rétrécir */
+        }
+
+        .pin-button.pinned {
+            color: var(--pin-color);
+        }
+
+        .messages-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message.sender {
+            align-self: flex-end;
+            background-color: var(--message-bg-sender);
+            color: var(--text-light);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.receiver {
+            align-self: flex-start;
+            background-color: var(--message-bg-receiver);
+            color: var(--text-dark);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-timestamp {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.7);
+            margin-top: 5px;
+            text-align: right;
+        }
+        .message.receiver .message-timestamp {
+            color: #888;
+            text-align: left;
+        }
+
+        .message-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--text-light);
+        }
+
+        .message-input-area input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 1em;
+            margin-right: 10px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .message-input-area input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            outline: none;
+        }
+
+        .message-input-area button {
+            background: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            white-space: nowrap;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .message-input-area button:hover {
+            background: var(--primary-hover-color);
+            transform: translateY(-1px);
+        }
+
+        .message-input-area button:active {
+            transform: translateY(0);
+        }
+
+        /* --- Scrollbar Customization --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D0D0D0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B0B0B0;
+        }
+
+        /* Styles pour les messages d'état (login, error) */
+        .message-status {
+            margin-top: 25px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out, background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+        .message-status.show {
+            opacity: 1;
+        }
+        .message-status.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+        }
+        .message-status.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+        }
+        .message-status.loading {
+            background-color: #e6f7ff;
+            color: #007bff;
+        }
+    </style>
 </head>
 <body>
-  <div id="sidebar">
-    <div style="padding: 15px; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 1.2em;">Messagerie</div>
-    <div id="conversationList"></div>
-  </div>
 
-  <div id="main">
-    <div id="messagesContainer"></div>
-    <div id="chatInput">
-      <input type="text" id="messageInput" placeholder="Écrire un message...">
-      <button id="sendMessageButton">Envoyer</button>
+    <div id="auth-section">
+        <h2>Se connecter / S'inscrire à ON Tech Chat</h2>
+        <form id="auth-form">
+            <div class="input-group">
+                <label for="authEmail">Adresse email</label>
+                <input type="email" id="authEmail" placeholder="votre.email@example.com" required>
+            </div>
+            <div class="input-group">
+                <label for="authPassword">Mot de passe</label>
+                <input type="password" id="authPassword" placeholder="Minimum 6 caractères" required>
+            </div>
+            <button type="submit" id="loginButton">Se connecter</button>
+            <button type="button" id="registerButton" style="background-color: var(--secondary-color); margin-top: 10px;">S'inscrire</button>
+        </form>
+        <div id="auth-message" class="message-status"></div>
     </div>
-  </div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script>
-    // Ton code Firebase ici, suivi du script JS que tu as fourni, tout fusionné et corrigé.
-  </script>
+    <div id="chat-interface">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Conversations</h3>
+                <button id="start-new-chat-button" title="Démarrer une nouvelle conversation" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--primary-color);">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+            <div class="conversation-list" id="conversation-list">
+                <p style="text-align: center; color: #888; padding: 20px;">
+                    Aucune conversation pour le moment.<br>
+                    Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.
+                </p>
+            </div>
+            <div class="sidebar-footer">
+                <button id="logout-button">Se déconnecter</button>
+            </div>
+        </div>
+
+        <div class="chat-main">
+            <div class="chat-header">
+                <h4 id="current-chat-name">Sélectionnez une conversation</h4>
+                <button id="pin-toggle-button" class="pin-button" title="Épingler/Désépingler la conversation" style="display: none;">
+                    <i class="fas fa-star"></i>
+                </button>
+            </div>
+            <div class="messages-container" id="messages-container">
+                <p style="text-align: center; color: #888; padding-top: 50px;">
+                    Bienvenue dans votre chat ON Tech!<br>
+                    Sélectionnez une conversation pour commencer ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une nouvelle.
+                </p>
+            </div>
+            <div class="message-input-area">
+                <input type="text" id="message-input" placeholder="Écrire un message..." disabled>
+                <button id="send-message-button" disabled><i class="fas fa-paper-plane"></i> Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuration Firebase (UTILISEZ VOS PROPRES CLÉS SECRÈTES ! NE LES LAISSEZ PAS PUBLIQUES EN PRODUCTION)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+            authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+            projectId: "messagerie-ontech-cloud",
+            storageBucket: "messagerie-ontech-cloud.appspot.com",
+            messagingSenderId: "45424467520",
+            appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Références DOM
+        const authSection = document.getElementById('auth-section');
+        const authForm = document.getElementById('auth-form');
+        const authEmailInput = document.getElementById('authEmail');
+        const authPasswordInput = document.getElementById('authPassword');
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const authMessageDiv = document.getElementById('auth-message');
+
+        const chatInterface = document.getElementById('chat-interface');
+        const sidebarHeader = document.querySelector('.sidebar-header');
+        const conversationListDiv = document.getElementById('conversation-list');
+        const startNewChatButton = document.getElementById('start-new-chat-button');
+        const logoutButton = document.getElementById('logout-button');
+
+        const currentChatName = document.getElementById('current-chat-name');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageButton = document.getElementById('send-message-button');
+        const pinToggleButton = document.getElementById('pin-toggle-button');
+
+        let currentUser = null;
+        let currentUserData = null; // Données Firestore de l'utilisateur actuel
+        let currentChatId = null;
+        let currentChatPartnerId = null;
+        let unsubscribeMessages = null; // Listener de messages Firestore
+        let unsubscribeUserChats = null; // Listener des conversations de l'utilisateur
+        let unreadMessagesTracker = {}; // { chatId: true/false }
+
+        // Cache des noms d'utilisateur pour éviter des lectures répétées
+        const usernameCache = {};
+
+        // URLs de redirection
+        const REGISTER_SUCCESS_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/register.html";
+        const LOGOUT_REDIRECT_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/login.html";
+
+
+        // --- Fonctions d'aide pour l'affichage des messages d'état ---
+        function displayAuthMessage(text, type) {
+            authMessageDiv.innerText = text;
+            authMessageDiv.className = `message-status show ${type}`;
+            setTimeout(() => {
+                authMessageDiv.classList.remove('show');
+            }, 5000); // Reste visible plus longtemps
+        }
+
+        // --- Authentification ---
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            displayAuthMessage("Connexion en cours...", "loading");
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                // onAuthStateChanged va gérer la suite, pas de redirection ici directement
+            } catch (error) {
+                displayAuthMessage(`Erreur de connexion: ${error.message}`, "error");
+            }
+        });
+
+        registerButton.addEventListener('click', async () => {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            if (!email || !password || password.length < 6) {
+                displayAuthMessage("Veuillez entrer un email valide et un mot de passe d'au moins 6 caractères.", "error");
+                return;
+            }
+
+            displayAuthMessage("Inscription en cours...", "loading");
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+
+                // Enregistrement des infos utilisateur dans Firestore
+                await db.collection("users").doc(currentUser.uid).set({
+                    email: email,
+                    username: email.split('@')[0], // Pseudo par défaut
+                    pinnedChats: [] // Initialise les conversations épinglées
+                });
+                
+                displayAuthMessage("Inscription réussie! Redirection...", "success");
+                setTimeout(() => {
+                    window.location.href = REGISTER_SUCCESS_URL; // Rediriger après l'inscription
+                }, 2000);
+
+            } catch (error) {
+                displayAuthMessage(`Erreur d'inscription: ${error.message}`, "error");
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                // S'assurer que tous les listeners Firestore sont désactivés avant de déconnecter
+                if (unsubscribeMessages) unsubscribeMessages();
+                if (unsubscribeUserChats) unsubscribeUserChats();
+                
+                await auth.signOut();
+                console.log("Utilisateur déconnecté.");
+                window.location.href = LOGOUT_REDIRECT_URL; // Rediriger vers la page de connexion
+            } catch (error) {
+                console.error("Erreur de déconnexion:", error);
+                alert("Erreur lors de la déconnexion: " + error.message);
+            }
+        });
+
+        // --- Initialisation du Chat après connexion ---
+        async function initializeChat() {
+            authSection.style.display = 'none';
+            chatInterface.style.display = 'flex';
+            requestNotificationPermission(); // Demander la permission de notification
+
+            // Écoute les changements dans les infos de l'utilisateur (pour les chats épinglés et le pseudo)
+            if (unsubscribeUserChats) {
+                unsubscribeUserChats(); // Désabonner l'ancien listener si présent
+            }
+            unsubscribeUserChats = db.collection("users").doc(currentUser.uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    currentUserData = doc.data(); // Stocke les données utilisateur
+                    loadConversations(); // Recharger les conversations pour refléter les épinglés ou nouveaux pseudos
+                } else {
+                    console.warn("Document utilisateur non trouvé pour ID:", currentUser.uid);
+                    // Si le document utilisateur disparaît de manière inattendue, déconnecter
+                    auth.signOut(); 
+                }
+            }, error => {
+                console.error("Erreur d'écoute des données utilisateur:", error);
+                // Si une erreur de permission se produit ici, c'est que les règles sont incorrectes.
+                // displayAuthMessage("Erreur de chargement de votre profil. Vérifiez les règles Firestore.", "error"); // Pas ici car l'utilisateur est déjà dans le chat interface
+            });
+
+
+            // Écoute les nouveaux messages pour toutes les conversations de l'utilisateur (pour les notifications et le badge non lu)
+            db.collection("chats")
+                .where("participants", "array-contains", currentUser.uid)
+                .orderBy("updatedAt", "desc") 
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(async change => {
+                        const chatData = change.doc.data();
+                        const chatId = change.doc.id;
+
+                        const partnerId = chatData.participants.find(p => p !== currentUser.uid);
+
+                        // Si c'est un nouveau message ou une mise à jour et que l'utilisateur n'est PAS sur ce chat
+                        // et que le message ne vient pas de l'utilisateur actuel
+                        if (chatId !== currentChatId && chatData.lastMessage && chatData.lastMessage.senderId !== currentUser.uid) {
+                            if (!unreadMessagesTracker[chatId]) { 
+                                unreadMessagesTracker[chatId] = true;
+                                loadConversations(); // Rafraîchir pour afficher l'indicateur "non lu"
+                                await showNewMessageNotification(chatId, chatData.lastMessage.text, partnerId);
+                            }
+                        } else if (chatId === currentChatId) {
+                             // Si l'utilisateur est sur la conversation, la marquer comme lue
+                             if (unreadMessagesTracker[chatId]) { // Seulement si elle était non lue
+                                 unreadMessagesTracker[chatId] = false;
+                                 loadConversations(); // Pour enlever l'indicateur non lu de la liste
+                             }
+                        }
+                    });
+                }, error => console.error("Erreur d'écoute des chats pour les mises à jour globales:", error));
+            
+            // Premier chargement des conversations
+            loadConversations(); 
+        }
+
+        // --- Demande de permission de notification ---
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            console.log("Permission de notification accordée.");
+                        } else {
+                            console.warn("Permission de notification refusée ou ignorée.");
+                        }
+                    });
+                }
+            }
+        }
+
+        // --- Afficher une notification pour les nouveaux messages ---
+        async function showNewMessageNotification(chatId, messageText, partnerId) {
+            if (Notification.permission === "granted" && chatId !== currentChatId) { 
+                let partnerName = usernameCache[partnerId];
+                if (!partnerName) {
+                    const partnerDoc = await db.collection("users").doc(partnerId).get();
+                    if (partnerDoc.exists) {
+                        partnerName = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
+                        usernameCache[partnerId] = partnerName; 
+                    } else {
+                        partnerName = "Quelqu'un";
+                    }
+                }
+
+                new Notification(`Nouveau message de ${partnerName}`, {
+                    body: messageText,
+                    icon: 'https://via.placeholder.com/64/4A90E2/FFFFFF?text=ON', 
+                    tag: chatId, 
+                    renotify: true 
+                });
+            }
+        }
+
+
+        // --- Charger la liste des conversations ---
+        async function loadConversations() {
+            if (!currentUser) {
+                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Veuillez vous connecter pour voir vos conversations.</p>';
+                return;
+            }
+            if (!currentUserData) {
+                 conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement de votre profil utilisateur...</p>';
+                 return;
+            }
+
+            conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement des conversations...</p>';
+
+            try {
+                const userChatsSnapshot = await db.collection("chats")
+                    .where("participants", "array-contains", currentUser.uid)
+                    .orderBy("updatedAt", "desc") 
+                    .get();
+
+                const conversations = [];
+                const partnerIdsToFetch = new Set();
+
+                userChatsSnapshot.forEach(doc => {
+                    const chatData = doc.data();
+                    const chatId = doc.id;
+                    const partnerId = chatData.participants.find(p => p !== currentUser.uid);
+                    if (partnerId) {
+                        partnerIdsToFetch.add(partnerId);
+                        conversations.push({
+                            chatId,
+                            partnerId,
+                            lastMessageTimestamp: chatData.updatedAt ? chatData.updatedAt.toDate() : new Date(0),
+                            isPinned: currentUserData.pinnedChats && currentUserData.pinnedChats.includes(chatId),
+                            isUnread: unreadMessagesTracker[chatId] || false 
+                        });
+                    }
+                });
+
+                // Récupérer les noms d'utilisateur des partenaires en une seule fois
+                await Promise.all(Array.from(partnerIdsToFetch).map(async (pId) => {
+                    if (!usernameCache[pId]) {
+                        const partnerDoc = await db.collection("users").doc(pId).get();
+                        if (partnerDoc.exists) {
+                            usernameCache[pId] = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
+                        } else {
+                            usernameCache[pId] = "Utilisateur Inconnu";
+                        }
+                    }
+                }));
+
+                // Trier: épinglées d'abord, puis par date du dernier message
+                conversations.sort((a, b) => {
+                    if (a.isPinned && !b.isPinned) return -1;
+                    if (!a.isPinned && b.isPinned) return 1;
+                    return b.lastMessageTimestamp - a.lastMessageTimestamp;
+                });
+
+                conversationListDiv.innerHTML = '';
+                if (conversations.length === 0) {
+                    conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
+                } else {
+                    conversations.forEach(conv => {
+                        const partnerName = usernameCache[conv.partnerId];
+                        const itemHtml = `
+                            <div class="conversation-item ${conv.chatId === currentChatId ? 'active' : ''} ${conv.isUnread ? 'unread' : ''} ${conv.isPinned ? 'pinned' : ''}" data-chat-id="${conv.chatId}" data-partner-id="${conv.partnerId}">
+                                <span class="pin-icon"><i class="fas fa-star"></i></span>
+                                <span>${partnerName}</span>
+                                <span class="unread-dot"></span>
+                            </div>
+                        `;
+                        conversationListDiv.insertAdjacentHTML('beforeend', itemHtml);
+                    });
+                }
+                
+                attachConversationClickListeners();
+
+            } catch (error) {
+                console.error("Erreur de chargement des conversations:", error);
+                conversationListDiv.innerHTML = '<p style="text-align: center; color: var(--logout-button-color); padding: 20px;">Erreur de chargement des conversations. Vérifiez vos règles de sécurité Firestore.</p>';
+            }
+        }
+
+
+        // --- Attacher les listeners aux conversations ---
+        function attachConversationClickListeners() {
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.onclick = () => selectConversation(item.dataset.chatId, item.dataset.partnerId);
+            });
+        }
+
+        // --- Sélectionner une conversation ---
+        async function selectConversation(chatId, partnerId) {
+            if (!currentUser) return; 
+
+            // Désélectionner l'ancienne conversation active
+            const prevActive = document.querySelector('.conversation-item.active');
+            if (prevActive) {
+                prevActive.classList.remove('active');
+            }
+
+            // Mettre à jour la nouvelle conversation comme active et marquer comme lue
+            const currentActive = document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`);
+            if (currentActive) {
+                currentActive.classList.add('active');
+                currentActive.classList.remove('unread'); 
+                unreadMessagesTracker[chatId] = false; 
+            }
+
+            currentChatId = chatId;
+            currentChatPartnerId = partnerId;
+            messageInput.disabled = false;
+            sendMessageButton.disabled = false;
+            pinToggleButton.style.display = 'block'; 
+
+            // Récupérer le nom du partenaire (si pas déjà en cache)
+            let partnerName = usernameCache[partnerId];
+            if (!partnerName) {
+                const partnerDoc = await db.collection("users").doc(partnerId).get();
+                if (partnerDoc.exists) {
+                    partnerName = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
+                    usernameCache[partnerId] = partnerName; 
+                } else {
+                    partnerName = "Utilisateur Inconnu";
+                }
+            }
+            currentChatName.innerText = partnerName;
+
+            // Mettre à jour l'état du bouton d'épinglage
+            if (currentUserData && currentUserData.pinnedChats && currentUserData.pinnedChats.includes(chatId)) {
+                pinToggleButton.classList.add('pinned');
+            } else {
+                pinToggleButton.classList.remove('pinned');
+            }
+
+            // Désabonner l'ancien listener de messages si existant
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+
+            messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Chargement des messages...</p>';
+
+            // Écouter les messages pour la conversation sélectionnée
+            unsubscribeMessages = db.collection("chats").doc(chatId)
+                .collection("messages")
+                .orderBy("timestamp")
+                .onSnapshot(snapshot => {
+                    messagesContainer.innerHTML = '';
+                    if (snapshot.empty) {
+                        messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Aucun message dans cette conversation. Soyez le premier !</p>';
+                    } else {
+                        snapshot.forEach(doc => {
+                            const message = doc.data();
+                            const isSender = message.senderId === currentUser.uid;
+                            const messageDiv = document.createElement('div');
+                            messageDiv.classList.add('message');
+                            messageDiv.classList.add(isSender ? 'sender' : 'receiver');
+                            
+                            let timeString = '';
+                            if (message.timestamp) {
+                                if (typeof message.timestamp.toDate === 'function') {
+                                    timeString = new Date(message.timestamp.toDate()).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                                } else {
+                                    timeString = 'Envoyé...'; 
+                                }
+                            }
+                            
+                            messageDiv.innerHTML = `
+                                ${message.text}
+                                <div class="message-timestamp">${timeString}</div>
+                            `;
+                            messagesContainer.appendChild(messageDiv);
+                        });
+                    }
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+                }, error => {
+                    console.error("Erreur de chargement des messages:", error);
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: var(--logout-button-color); padding: 50px;">Erreur de chargement des messages. Vérifiez vos règles de sécurité Firestore.</p>';
+                });
+        }
+
+        // --- Envoyer un message ---
+        sendMessageButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === "" || !currentChatId || !currentUser) {
+                return;
+            }
+
+            const message = {
+                senderId: currentUser.uid,
+                text: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                const chatRef = db.collection("chats").doc(currentChatId);
+                const messagesRef = chatRef.collection("messages");
+
+                await messagesRef.add(message);
+
+                await chatRef.set({
+                    lastMessage: {
+                        senderId: message.senderId,
+                        text: message.text,
+                        timestamp: message.timestamp
+                    },
+                    participants: [currentUser.uid, currentChatPartnerId], 
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }); 
+
+                messageInput.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error("Erreur lors de l'envoi du message:", error);
+                alert("Erreur lors de l'envoi du message : " + error.message + ". Vérifiez vos règles de sécurité Firestore.");
+            }
+        }
+
+        // --- Gérer l'épinglage/désépinglage ---
+        pinToggleButton.addEventListener('click', async () => {
+            if (!currentUser || !currentChatId || !currentUserData) return;
+
+            const userRef = db.collection("users").doc(currentUser.uid);
+            let pinnedChats = currentUserData.pinnedChats || [];
+
+            if (pinnedChats.includes(currentChatId)) {
+                // Désépingler
+                pinnedChats = pinnedChats.filter(id => id !== currentChatId);
+                pinToggleButton.classList.remove('pinned');
+            } else {
+                // Épingler
+                pinnedChats.push(currentChatId);
+                pinToggleButton.classList.add('pinned');
+            }
+
+            try {
+                await userRef.update({ pinnedChats: pinnedChats });
+                currentUserData.pinnedChats = pinnedChats; 
+                console.log(`Chat ${currentChatId} épinglé/désépinglé.`);
+                loadConversations(); 
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de l'épinglage:", error);
+                alert("Impossible de mettre à jour l'épinglage : " + error.message + ". Vérifiez vos règles de sécurité Firestore.");
+            }
+        });
+
+
+        // --- Démarrer une nouvelle conversation (simulée pour l'exemple) ---
+        startNewChatButton.addEventListener('click', async () => {
+            if (!currentUser) {
+                alert("Veuillez vous connecter pour démarrer une nouvelle conversation.");
+                return;
+            }
+
+            const targetEmail = prompt("Entrez l'adresse email de l'utilisateur avec qui vous voulez discuter:");
+            if (!targetEmail || targetEmail.trim() === "") {
+                return;
+            }
+
+            if (targetEmail.trim().toLowerCase() === currentUser.email.toLowerCase()) {
+                alert("Vous ne pouvez pas discuter avec vous-même !");
+                return;
+            }
+
+            try {
+                // 1. Trouver l'utilisateur cible par son email
+                const usersRef = db.collection("users");
+                const querySnapshot = await usersRef.where("email", "==", targetEmail.trim().toLowerCase()).limit(1).get();
+
+                if (querySnapshot.empty) {
+                    alert("Aucun utilisateur trouvé avec cet email.");
+                    return;
+                }
+
+                const targetUserDoc = querySnapshot.docs[0];
+                const targetUserId = targetUserDoc.id;
+                const targetUsername = targetUserDoc.data().username || targetUserDoc.data().email.split('@')[0];
+
+                // 2. Vérifier si une conversation existe déjà entre les deux utilisateurs
+                const participants = [currentUser.uid, targetUserId].sort(); 
+                const existingChatsSnapshot = await db.collection("chats")
+                    .where("participants", "==", participants)
+                    .limit(1)
+                    .get();
+
+                let chatId;
+                if (!existingChatsSnapshot.empty) {
+                    // Conversation existante
+                    chatId = existingChatsSnapshot.docs[0].id;
+                    console.log("Conversation existante trouvée:", chatId);
+                } else {
+                    // Créer une nouvelle conversation
+                    const newChatRef = await db.collection("chats").add({
+                        participants: participants,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastMessage: { text: "Nouvelle conversation", senderId: "system", timestamp: firebase.firestore.FieldValue.serverTimestamp() }
+                    });
+                    chatId = newChatRef.id;
+                    console.log("Nouvelle conversation créée:", chatId);
+                }
+
+                // Sélectionner la conversation nouvellement trouvée ou créée
+                selectConversation(chatId, targetUserId);
+                alert(`Conversation avec ${targetUsername} ouverte !`);
+
+            } catch (error) {
+                console.error("Erreur lors de la création/recherche de conversation:", error);
+                alert("Impossible de démarrer la conversation: " + error.message + ". Vérifiez vos règles de sécurité Firestore.");
+            }
+        });
+
+
+        // --- Vérifier l'état de l'authentification au chargement de la page ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                // Récupérer les données utilisateur (y compris pinnedChats)
+                try {
+                    const doc = await db.collection("users").doc(currentUser.uid).get();
+                    if (doc.exists) {
+                        currentUserData = doc.data();
+                        // Pas de message ici pour éviter le clignotement, l'interface change
+                        initializeChat();
+                    } else {
+                        console.warn("Document utilisateur manquant pour un utilisateur authentifié. Création ou déconnexion.");
+                        // Ceci devrait rarement se produire avec la logique d'inscription actuelle
+                        // mais si cela arrive, on peut le créer ici ou forcer une déconnexion
+                        await db.collection("users").doc(currentUser.uid).set({
+                            email: currentUser.email,
+                            username: currentUser.email.split('@')[0],
+                            pinnedChats: []
+                        });
+                        currentUserData = { email: currentUser.email, username: currentUser.email.split('@')[0], pinnedChats: [] };
+                        initializeChat();
+                    }
+                } catch (error) {
+                    console.error("Erreur de chargement des données utilisateur au démarrage:", error);
+                    displayAuthMessage("Erreur de chargement de votre profil. Veuillez vous reconnecter et vérifier vos règles Firestore.", "error");
+                    await auth.signOut(); // Déconnecter en cas d'erreur grave
+                }
+            } else {
+                // Pas d'utilisateur connecté
+                currentUser = null;
+                currentUserData = null;
+                currentChatId = null;
+                currentChatPartnerId = null;
+                if (unsubscribeMessages) unsubscribeMessages();
+                if (unsubscribeUserChats) unsubscribeUserChats();
+                usernameCache = {}; 
+                unreadMessagesTracker = {};
+
+                authSection.style.display = 'flex';
+                chatInterface.style.display = 'none';
+                authForm.reset(); 
+                messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Bienvenue dans votre chat ON Tech!<br>Sélectionnez une conversation pour commencer ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une nouvelle.</p>';
+                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
+                currentChatName.innerText = "Sélectionnez une conversation";
+                pinToggleButton.style.display = 'none';
+                messageInput.disabled = true;
+                sendMessageButton.disabled = true;
+                displayAuthMessage("Veuillez vous connecter ou vous inscrire.", "info");
+            }
+        });
+    </script>
 </body>
 </html>

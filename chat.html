@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - ON Tech</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Chat ON Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4A90E2;
-            --secondary-color: #7ED321;
-            --background-light: #F4F7F6;
-            --text-dark: #333333;
-            --text-light: #FFFFFF;
-            --border-color: #E0E0E0;
-            --shadow-light: rgba(0, 0, 0, 0.08);
-            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --primary-color: #4A90E2; /* Bleu principal */
+            --primary-hover-color: #3A7BBF; /* Bleu plus foncé au survol */
+            --secondary-color: #7ED321; /* Vert pour les éléments secondaires ou accents */
+            --background-light: #F4F7F6; /* Arrière-plan général clair */
+            --background-darker: #E9EBED; /* Arrière-plan légèrement plus foncé */
+            --text-dark: #333333; /* Couleur de texte sombre */
+            --text-light: #FFFFFF; /* Couleur de texte clair */
+            --border-color: #E0E0E0; /* Couleur des bordures */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Ombre légère */
+            --shadow-medium: rgba(0, 0, 0, 0.15); /* Ombre moyenne */
+            --message-bg-sender: var(--primary-color);
+            --message-bg-receiver: #F0F0F0;
+            --unread-indicator: #FF5722; /* Rouge-orangé pour non lu */
+            --pin-color: #FFC107; /* Jaune pour épingle */
         }
 
         body {
@@ -28,146 +34,326 @@
             padding: 20px;
             box-sizing: border-box;
             color: var(--text-dark);
+            overflow: hidden;
+            flex-direction: column; /* Permet d'avoir un titre au-dessus si besoin */
         }
 
-        .container {
+        #auth-section {
             background: var(--text-light);
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 10px 30px var(--shadow-medium);
             text-align: center;
             width: 100%;
-            max-width: 450px;
-            animation: fadeIn 0.8s ease-out;
+            max-width: 400px;
+            animation: fadeIn 0.8s ease-out forwards;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        #chat-interface {
+            display: none; /* Caché par défaut, affiché après connexion */
+            background: var(--text-light);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            max-height: 800px;
+            display: flex;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out forwards;
         }
 
-        h2 {
+        /* --- Sidebar (Liste des conversations) --- */
+        .sidebar {
+            width: 350px; /* Largeur fixe pour la sidebar */
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-darker);
+        }
+
+        .sidebar h3 {
+            padding: 20px;
+            margin: 0;
             color: var(--primary-color);
-            margin-bottom: 30px;
+            font-size: 1.4em;
             font-weight: 600;
-            font-size: 1.8em;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .input-group {
-            margin-bottom: 20px;
+        .conversation-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+
+        .conversation-item:hover, .conversation-item.active {
+            background-color: var(--background-light);
+        }
+
+        .conversation-item.unread {
+            font-weight: 600;
+            background-color: #EBF5FF; /* Légèrement teinté pour non lu */
+        }
+
+        .conversation-item.unread::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--unread-indicator);
+            border-radius: 50%;
+        }
+
+        .conversation-item.pinned .pin-icon {
+            color: var(--pin-color);
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .conversation-item:not(.pinned) .pin-icon {
+            display: none;
+        }
+
+        .conversation-item span {
+            flex-grow: 1;
+            font-size: 1.05em;
+        }
+
+        /* --- Chat Main Area --- */
+        .chat-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--text-light);
+            box-shadow: 0 2px 5px var(--shadow-light);
+        }
+
+        .chat-header h4 {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .pin-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ccc;
+            transition: color 0.2s ease;
+        }
+
+        .pin-button.pinned {
+            color: var(--pin-color);
+        }
+
+        .messages-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word; /* Important pour les longs mots */
+        }
+
+        .message.sender {
+            align-self: flex-end;
+            background-color: var(--message-bg-sender);
+            color: var(--text-light);
+            border-bottom-right-radius: 2px; /* Pour l'effet bulle */
+        }
+
+        .message.receiver {
+            align-self: flex-start;
+            background-color: var(--message-bg-receiver);
+            color: var(--text-dark);
+            border-bottom-left-radius: 2px; /* Pour l'effet bulle */
+        }
+
+        .message-timestamp {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 5px;
+            text-align: right;
+        }
+        .message.receiver .message-timestamp {
             text-align: left;
         }
 
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 400;
-            color: var(--text-dark);
-            font-size: 0.95em;
+        .message-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--text-light);
         }
 
-        .input-group input {
-            width: calc(100% - 24px); /* Adjusted for padding */
-            padding: 12px;
+        .message-input-area input {
+            flex-grow: 1;
+            padding: 12px 15px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 25px;
             font-size: 1em;
+            margin-right: 10px;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            box-sizing: border-box; /* Include padding in width */
+            box-sizing: border-box;
         }
 
-        .input-group input:focus {
+        .message-input-area input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
             outline: none;
         }
 
-        button {
+        .message-input-area button {
             background: var(--primary-color);
             color: var(--text-light);
             border: none;
-            padding: 14px 25px;
-            border-radius: 8px;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 1em;
             cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
             transition: background 0.3s ease, transform 0.2s ease;
-            width: 100%;
-            margin-top: 20px;
+            white-space: nowrap; /* Empêche le texte de se casser */
+            width: auto;
+            margin-top: 0; /* Override default button margin */
         }
 
-        button:hover {
-            background: #3A7BBF; /* Slightly darker primary color */
-            transform: translateY(-2px);
+        .message-input-area button:hover {
+            background: var(--primary-hover-color);
+            transform: translateY(-1px);
         }
 
-        button:active {
+        .message-input-area button:active {
             transform: translateY(0);
         }
 
-        #message {
+        /* --- Scrollbar Customization --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D0D0D0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B0B0B0;
+        }
+
+        /* Styles pour les messages d'état (login, error) */
+        .message-status {
             margin-top: 25px;
             padding: 12px;
             border-radius: 8px;
             font-weight: 500;
-            min-height: 20px; /* To prevent layout shift */
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.4s ease-in-out;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out, background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
         }
-
-        #message.show {
+        .message-status.show {
             opacity: 1;
         }
-
-        #message.success {
+        .message-status.success {
             background-color: #e6ffe6;
             color: #28a745;
         }
-
-        #message.error {
+        .message-status.error {
             background-color: #ffe6e6;
             color: #dc3545;
         }
-
-        #message.loading {
+        .message-status.loading {
             background-color: #e6f7ff;
             color: #007bff;
+        }
+
+        /* Icones (ajoutez une bibliothèque d'icônes comme Font Awesome pour de vraies icônes) */
+        .icon {
+            font-family: 'Font Awesome 5 Free'; /* Exemple, à remplacer par votre lib */
+            font-weight: 900;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Créer un compte ON Tech</h2>
-        <form onsubmit="registerUser(event)">
+    <div id="auth-section">
+        <h2>Se connecter / S'inscrire à ON Tech Chat</h2>
+        <form id="auth-form">
             <div class="input-group">
-                <label for="firstName">Prénom</label>
-                <input type="text" id="firstName" placeholder="Votre prénom" required>
+                <label for="authEmail">Adresse email</label>
+                <input type="email" id="authEmail" placeholder="votre.email@example.com" required>
             </div>
             <div class="input-group">
-                <label for="lastName">Nom</label>
-                <input type="text" id="lastName" placeholder="Votre nom" required>
+                <label for="authPassword">Mot de passe</label>
+                <input type="password" id="authPassword" placeholder="Minimum 6 caractères" required>
             </div>
-            <div class="input-group">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" placeholder="Choisissez un nom d'utilisateur" required>
-            </div>
-            <div class="input-group">
-                <label for="birthdate">Date de naissance</label>
-                <input type="date" id="birthdate" required>
-            </div>
-            <div class="input-group">
-                <label for="email">Adresse email</label>
-                <input type="email" id="email" placeholder="votre.email@example.com" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" placeholder="Minimum 6 caractères" required>
-            </div>
-            <button type="submit">S'inscrire</button>
+            <button type="submit" id="loginButton">Se connecter</button>
+            <button type="button" id="registerButton" style="background-color: #7ED321; margin-top: 10px;">S'inscrire</button>
         </form>
+        <div id="auth-message" class="message-status"></div>
+    </div>
 
-        <div id="message"></div>
+    <div id="chat-interface">
+        <div class="sidebar">
+            <h3>Conversations</h3>
+            <div class="conversation-list" id="conversation-list">
+                </div>
+        </div>
+
+        <div class="chat-main">
+            <div class="chat-header">
+                <h4 id="current-chat-name">Sélectionnez une conversation</h4>
+                <button id="pin-toggle-button" class="pin-button" title="Épingler/Désépingler la conversation">⭐</button>
+            </div>
+            <div class="messages-container" id="messages-container">
+                </div>
+            <div class="message-input-area">
+                <input type="text" id="message-input" placeholder="Écrire un message..." disabled>
+                <button id="send-message-button" disabled>Envoyer</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -175,6 +361,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <script>
+        // Configuration Firebase (utilisez vos propres clés ! Celles-ci sont des exemples)
         const firebaseConfig = {
             apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
             authDomain: "messagerie-ontech-cloud.firebaseapp.com",
@@ -188,47 +375,406 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        async function registerUser(e) {
+        // Références DOM
+        const authSection = document.getElementById('auth-section');
+        const authForm = document.getElementById('auth-form');
+        const authEmailInput = document.getElementById('authEmail');
+        const authPasswordInput = document.getElementById('authPassword');
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const authMessageDiv = document.getElementById('auth-message');
+
+        const chatInterface = document.getElementById('chat-interface');
+        const conversationListDiv = document.getElementById('conversation-list');
+        const currentChatName = document.getElementById('current-chat-name');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageButton = document.getElementById('send-message-button');
+        const pinToggleButton = document.getElementById('pin-toggle-button');
+
+        let currentUser = null;
+        let currentChatId = null;
+        let currentChatPartnerId = null;
+        let unsubscribeMessages = null; // Pour désabonner le listener de messages
+        let userConversations = {}; // Pour stocker les détails des conversations (nom, épinglé, non lu)
+        let unreadMessagesTracker = {}; // { chatId: true/false }
+
+        // --- Fonctions d'aide pour l'affichage des messages d'état ---
+        function displayAuthMessage(text, type) {
+            authMessageDiv.innerText = text;
+            authMessageDiv.className = `message-status show ${type}`;
+            setTimeout(() => {
+                authMessageDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Authentification ---
+        authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const username = document.getElementById('username').value.trim();
-            const birthdate = document.getElementById('birthdate').value;
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
 
-            const messageDiv = document.getElementById("message");
-            messageDiv.className = 'loading show';
-            messageDiv.innerText = "⏳ Création du compte...";
-
+            displayAuthMessage("Connexion en cours...", "loading");
             try {
-                // Vérifie si le nom d’utilisateur existe déjà
-                const query = await db.collection("users").where("username", "==", username).get();
-                if (!query.empty) {
-                    messageDiv.className = 'error show';
-                    messageDiv.innerText = "⚠️ Ce nom d'utilisateur est déjà pris.";
-                    return;
-                }
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                currentUser = userCredential.user;
+                displayAuthMessage("Connexion réussie!", "success");
+                initializeChat();
+            } catch (error) {
+                displayAuthMessage(`Erreur de connexion: ${error.message}`, "error");
+            }
+        });
 
+        registerButton.addEventListener('click', async () => {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            if (!email || !password) {
+                displayAuthMessage("Veuillez entrer un email et un mot de passe.", "error");
+                return;
+            }
+
+            displayAuthMessage("Inscription en cours...", "loading");
+            try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
+                currentUser = userCredential.user;
 
-                await db.collection("users").doc(uid).set({
-                    firstName,
-                    lastName,
-                    username,
-                    birthdate,
-                    email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                // Enregistrement des infos utilisateur dans Firestore (ex: pseudo)
+                await db.collection("users").doc(currentUser.uid).set({
+                    email: email,
+                    username: email.split('@')[0], // Utilise la première partie de l'email comme pseudo par défaut
+                    pinnedChats: [] // Initialise les conversations épinglées
                 });
 
-                messageDiv.className = 'success show';
-                messageDiv.innerText = "✅ Compte créé avec succès !";
+                displayAuthMessage("Inscription réussie! Bienvenue!", "success");
+                initializeChat();
             } catch (error) {
-                messageDiv.className = 'error show';
-                messageDiv.innerText = `❌ Erreur : ${error.message}`;
+                displayAuthMessage(`Erreur d'inscription: ${error.message}`, "error");
+            }
+        });
+
+        // --- Initialisation du Chat après connexion ---
+        async function initializeChat() {
+            authSection.style.display = 'none';
+            chatInterface.style.display = 'flex';
+            requestNotificationPermission(); // Demander la permission de notification
+
+            // Écoute les changements dans les infos de l'utilisateur (pour les chats épinglés)
+            db.collection("users").doc(currentUser.uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    currentUser.userData = doc.data(); // Stocke les données utilisateur
+                    loadConversations(); // Recharger les conversations pour refléter les épinglés
+                }
+            });
+
+            // Écoute les nouveaux messages pour toutes les conversations de l'utilisateur
+            // (peut être optimisé pour de très nombreux utilisateurs, mais suffisant pour un petit chat)
+            db.collection("chats").where("participants", "array-contains", currentUser.uid)
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === "added" || change.type === "modified") {
+                            const chatData = change.doc.data();
+                            const chatId = change.doc.id;
+
+                            // Trouvez le partenaire dans les participants
+                            const partnerId = chatData.participants.find(p => p !== currentUser.uid);
+                            if (partnerId) {
+                                // Mettre à jour l'état "non lu" si ce n'est pas le chat actuel
+                                if (chatId !== currentChatId && chatData.lastMessage && chatData.lastMessage.senderId !== currentUser.uid) {
+                                    unreadMessagesTracker[chatId] = true;
+                                    loadConversations(); // Rafraîchir la liste des conversations
+                                    showNewMessageNotification(chatId, chatData.lastMessage.text);
+                                }
+                            }
+                        }
+                    });
+                }, error => console.error("Error listening to chats:", error));
+
+            loadConversations();
+        }
+
+        // --- Demande de permission de notification ---
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("Permission de notification accordée.");
+                    } else if (permission === "denied") {
+                        console.warn("Permission de notification refusée.");
+                    }
+                });
             }
         }
+
+        // --- Afficher une notification pour les nouveaux messages ---
+        async function showNewMessageNotification(chatId, messageText) {
+            if (Notification.permission === "granted") {
+                // Récupérer le nom de l'expéditeur du message
+                const chatRef = db.collection("chats").doc(chatId);
+                const chatDoc = await chatRef.get();
+                if (chatDoc.exists) {
+                    const chatData = chatDoc.data();
+                    const participantIds = chatData.participants.filter(id => id !== currentUser.uid);
+                    let partnerName = "Quelqu'un"; // Fallback
+                    if (participantIds.length > 0) {
+                        const partnerDoc = await db.collection("users").doc(participantIds[0]).get();
+                        if (partnerDoc.exists) {
+                            partnerName = partnerDoc.data().username || partnerDoc.data().email.split('@')[0];
+                        }
+                    }
+
+                    new Notification(`Nouveau message de ${partnerName}`, {
+                        body: messageText,
+                        icon: 'https://via.placeholder.com/64/4A90E2/FFFFFF?text=ON' // Remplacez par une vraie icône
+                    });
+                }
+            }
+        }
+
+        // --- Charger la liste des conversations ---
+        async function loadConversations() {
+            conversationListDiv.innerHTML = '<p style="text-align: center; color: #888;">Chargement...</p>';
+            const userConversationsMap = new Map(); // Pour stocker les conversations par ID de partenaire
+
+            // Récupérer tous les utilisateurs (pour trouver des partenaires de chat)
+            const usersSnapshot = await db.collection("users").get();
+            const allUsers = {};
+            usersSnapshot.forEach(doc => {
+                allUsers[doc.id] = doc.data();
+            });
+
+            // Récupérer les conversations où l'utilisateur est participant
+            db.collection("chats")
+                .where("participants", "array-contains", currentUser.uid)
+                .orderBy("lastMessage.timestamp", "desc") // Trie par dernier message
+                .onSnapshot(async (snapshot) => {
+                    userConversationsMap.clear(); // Réinitialise la map
+                    let pinnedChats = new Map(); // Pour les chats épinglés
+                    let unpinnedChats = new Map(); // Pour les chats non épinglés
+
+                    for (const docChange of snapshot.docChanges()) {
+                        if (docChange.type === "added" || docChange.type === "modified") {
+                            const chatData = docChange.doc.data();
+                            const chatId = docChange.doc.id;
+
+                            // Trouver l'ID du partenaire
+                            const partnerId = chatData.participants.find(p => p !== currentUser.uid);
+                            if (partnerId && allUsers[partnerId]) {
+                                const partnerName = allUsers[partnerId].username || allUsers[partnerId].email.split('@')[0];
+                                const isPinned = currentUser.userData.pinnedChats && currentUser.userData.pinnedChats.includes(chatId);
+                                const isUnread = unreadMessagesTracker[chatId] || false;
+
+                                const itemHtml = `
+                                    <div class="conversation-item ${chatId === currentChatId ? 'active' : ''} ${isUnread ? 'unread' : ''} ${isPinned ? 'pinned' : ''}" data-chat-id="${chatId}" data-partner-id="${partnerId}">
+                                        <span class="pin-icon">⭐</span>
+                                        <span>${partnerName}</span>
+                                    </div>
+                                `;
+
+                                if (isPinned) {
+                                    pinnedChats.set(chatId, itemHtml);
+                                } else {
+                                    unpinnedChats.set(chatId, itemHtml);
+                                }
+                            }
+                        }
+                    }
+
+                    // Reconstruire la liste dans le DOM
+                    conversationListDiv.innerHTML = '';
+                    // Ajouter les conversations épinglées en premier
+                    for (let [chatId, html] of pinnedChats) {
+                        conversationListDiv.insertAdjacentHTML('beforeend', html);
+                    }
+                    // Puis les non épinglées
+                    for (let [chatId, html] of unpinnedChats) {
+                        conversationListDiv.insertAdjacentHTML('beforeend', html);
+                    }
+
+                    attachConversationClickListeners();
+                }, error => {
+                    console.error("Error fetching conversations:", error);
+                    conversationListDiv.innerHTML = '<p style="text-align: center; color: #dc3545;">Erreur de chargement des conversations.</p>';
+                });
+        }
+
+
+        // --- Attacher les listeners aux conversations ---
+        function attachConversationClickListeners() {
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.onclick = () => selectConversation(item.dataset.chatId, item.dataset.partnerId);
+            });
+        }
+
+        // --- Sélectionner une conversation ---
+        async function selectConversation(chatId, partnerId) {
+            // Désélectionner l'ancienne conversation active
+            const prevActive = document.querySelector('.conversation-item.active');
+            if (prevActive) {
+                prevActive.classList.remove('active');
+            }
+
+            // Mettre à jour la nouvelle conversation comme active et marquer comme lue
+            const currentActive = document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`);
+            if (currentActive) {
+                currentActive.classList.add('active');
+                currentActive.classList.remove('unread'); // Marquer comme lu
+                unreadMessagesTracker[chatId] = false; // Mettre à jour le tracker
+            }
+
+            currentChatId = chatId;
+            currentChatPartnerId = partnerId;
+            messageInput.disabled = false;
+            sendMessageButton.disabled = false;
+
+            const partnerDoc = await db.collection("users").doc(partnerId).get();
+            if (partnerDoc.exists) {
+                const partnerData = partnerDoc.data();
+                currentChatName.innerText = partnerData.username || partnerData.email.split('@')[0];
+            } else {
+                currentChatName.innerText = "Utilisateur inconnu";
+            }
+
+            // Mettre à jour l'état du bouton d'épinglage
+            if (currentUser.userData && currentUser.userData.pinnedChats && currentUser.userData.pinnedChats.includes(chatId)) {
+                pinToggleButton.classList.add('pinned');
+            } else {
+                pinToggleButton.classList.remove('pinned');
+            }
+
+            // Désabonner l'ancien listener de messages si existant
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+
+            // Nettoyer les anciens messages
+            messagesContainer.innerHTML = '<p style="text-align: center; color: #888;">Chargement des messages...</p>';
+
+            // Écouter les messages pour la conversation sélectionnée
+            unsubscribeMessages = db.collection("chats").doc(chatId)
+                .collection("messages")
+                .orderBy("timestamp")
+                .onSnapshot(snapshot => {
+                    messagesContainer.innerHTML = ''; // Nettoyer avant d'ajouter les nouveaux messages
+                    snapshot.forEach(doc => {
+                        const message = doc.data();
+                        const isSender = message.senderId === currentUser.uid;
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message');
+                        messageDiv.classList.add(isSender ? 'sender' : 'receiver');
+                        messageDiv.innerHTML = `
+                            ${message.text}
+                            <div class="message-timestamp">${new Date(message.timestamp.toDate()).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+                        `;
+                        messagesContainer.appendChild(messageDiv);
+                    });
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll vers le bas
+                }, error => {
+                    console.error("Error getting messages:", error);
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: #dc3545;">Erreur de chargement des messages.</p>';
+                });
+        }
+
+        // --- Envoyer un message ---
+        sendMessageButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { // Envoyer avec Enter, nouvelle ligne avec Shift+Enter
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === "" || !currentChatId || !currentUser) {
+                return;
+            }
+
+            const message = {
+                senderId: currentUser.uid,
+                text: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                // Ajouter le message à la sous-collection "messages" du chat
+                await db.collection("chats").doc(currentChatId).collection("messages").add(message);
+
+                // Mettre à jour le dernier message dans le document principal du chat
+                await db.collection("chats").doc(currentChatId).update({
+                    lastMessage: message,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                messageInput.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error("Erreur lors de l'envoi du message:", error);
+            }
+        }
+
+        // --- Gérer l'épinglage/désépinglage ---
+        pinToggleButton.addEventListener('click', async () => {
+            if (!currentUser || !currentChatId) return;
+
+            const userRef = db.collection("users").doc(currentUser.uid);
+            const userData = currentUser.userData; // Données utilisateur actuelles
+            let pinnedChats = userData.pinnedChats || [];
+
+            if (pinnedChats.includes(currentChatId)) {
+                // Désépingler
+                pinnedChats = pinnedChats.filter(id => id !== currentChatId);
+                pinToggleButton.classList.remove('pinned');
+            } else {
+                // Épingler
+                pinnedChats.push(currentChatId);
+                pinToggleButton.classList.add('pinned');
+            }
+
+            try {
+                await userRef.update({ pinnedChats: pinnedChats });
+                currentUser.userData.pinnedChats = pinnedChats; // Mettre à jour localement
+                console.log(`Chat ${currentChatId} épinglé/désépinglé.`);
+                loadConversations(); // Recharger pour refléter le changement d'ordre
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de l'épinglage:", error);
+            }
+        });
+
+        // Vérifier l'état de l'authentification au chargement de la page
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                // Récupérer les données utilisateur (y compris pinnedChats)
+                db.collection("users").doc(currentUser.uid).get().then(doc => {
+                    if (doc.exists) {
+                        currentUser.userData = doc.data();
+                        initializeChat();
+                    } else {
+                        // Si l'utilisateur est authentifié mais n'a pas de doc users (nouvel utilisateur après l'ancienne inscription)
+                        db.collection("users").doc(currentUser.uid).set({
+                            email: currentUser.email,
+                            username: currentUser.email.split('@')[0],
+                            pinnedChats: []
+                        }).then(() => {
+                            currentUser.userData = { email: currentUser.email, username: currentUser.email.split('@')[0], pinnedChats: [] };
+                            initializeChat();
+                        }).catch(error => {
+                            console.error("Erreur création profil utilisateur:", error);
+                            authSection.style.display = 'flex'; // Afficher l'auth
+                            chatInterface.style.display = 'none';
+                        });
+                    }
+                }).catch(error => {
+                    console.error("Erreur chargement données utilisateur:", error);
+                    authSection.style.display = 'flex'; // Afficher l'auth
+                    chatInterface.style.display = 'none';
+                });
+            } else {
+                authSection.style.display = 'flex'; // Afficher la section d'authentification
+                chatInterface.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

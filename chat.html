@@ -273,6 +273,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-grow: 1; /* Allow h4 to take available space */
+            text-align: left;
         }
 
         .pin-button {
@@ -282,6 +284,8 @@
             font-size: 1.5em;
             color: #ccc;
             transition: color 0.2s ease;
+            margin-left: auto; /* Push to the right */
+            flex-shrink: 0; /* Prevent it from shrinking */
         }
 
         .pin-button.pinned {
@@ -478,7 +482,7 @@
             <div class="messages-container" id="messages-container">
                 <p style="text-align: center; color: #888; padding-top: 50px;">
                     Bienvenue dans votre chat ON Tech!<br>
-                    Sélectionnez une conversation pour commencer.
+                    Sélectionnez une conversation pour commencer ou cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une nouvelle.
                 </p>
             </div>
             <div class="message-input-area">
@@ -539,6 +543,11 @@
         // Cache des noms d'utilisateur pour éviter des lectures répétées
         const usernameCache = {};
 
+        // URLs de redirection
+        const REGISTER_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/register.html";
+        const LOGIN_URL = "https://ontech-cloud.github.io/ONTech-cloud-messagerie/login.html";
+
+
         // --- Fonctions d'aide pour l'affichage des messages d'état ---
         function displayAuthMessage(text, type) {
             authMessageDiv.innerText = text;
@@ -588,7 +597,12 @@
                     username: email.split('@')[0], // Pseudo par défaut
                     pinnedChats: [] // Initialise les conversations épinglées
                 });
-                // La fonction onAuthStateChanged se chargera d'initialiser le chat
+                
+                displayAuthMessage("Inscription réussie! Redirection...", "success");
+                setTimeout(() => {
+                    window.location.href = REGISTER_URL; // Rediriger après l'inscription
+                }, 2000);
+
             } catch (error) {
                 displayAuthMessage(`Erreur d'inscription: ${error.message}`, "error");
             }
@@ -598,25 +612,8 @@
             try {
                 await auth.signOut();
                 console.log("Utilisateur déconnecté.");
-                // Réinitialiser l'interface
-                currentUser = null;
-                currentUserData = null;
-                currentChatId = null;
-                currentChatPartnerId = null;
-                if (unsubscribeMessages) unsubscribeMessages();
-                if (unsubscribeUserChats) unsubscribeUserChats();
-                usernameCache = {}; // Vider le cache des pseudos
-                unreadMessagesTracker = {};
-
-                authSection.style.display = 'flex';
-                chatInterface.style.display = 'none';
-                authForm.reset(); // Réinitialiser le formulaire de connexion
-                messagesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 50px;">Bienvenue dans votre chat ON Tech!<br>Sélectionnez une conversation pour commencer.</p>';
-                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
-                currentChatName.innerText = "Sélectionnez une conversation";
-                pinToggleButton.style.display = 'none';
-                messageInput.disabled = true;
-                sendMessageButton.disabled = true;
+                // Rediriger vers la page de connexion après la déconnexion
+                window.location.href = LOGIN_URL;
 
             } catch (error) {
                 console.error("Erreur de déconnexion:", error);
@@ -632,6 +629,9 @@
 
             // Écoute les changements dans les infos de l'utilisateur (pour les chats épinglés)
             // et les mises à jour du pseudo, etc.
+            if (unsubscribeUserChats) {
+                unsubscribeUserChats(); // Désabonner l'ancien listener si présent
+            }
             unsubscribeUserChats = db.collection("users").doc(currentUser.uid).onSnapshot(doc => {
                 if (doc.exists) {
                     currentUserData = doc.data(); // Stocke les données utilisateur
@@ -717,7 +717,14 @@
 
         // --- Charger la liste des conversations ---
         async function loadConversations() {
-            if (!currentUser) return;
+            if (!currentUser) {
+                conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Veuillez vous connecter pour voir vos conversations.</p>';
+                return;
+            }
+            if (!currentUserData) {
+                 conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement de votre profil...</p>';
+                 return;
+            }
 
             conversationListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Chargement des conversations...</p>';
 
@@ -998,7 +1005,8 @@
                 const targetUsername = targetUserDoc.data().username || targetUserDoc.data().email.split('@')[0];
 
                 // 2. Vérifier si une conversation existe déjà entre les deux utilisateurs
-                const participants = [currentUser.uid, targetUserId].sort(); // Normaliser l'ordre des participants
+                // Sortir les IDs pour avoir un tableau consistent pour la recherche
+                const participants = [currentUser.uid, targetUserId].sort(); 
                 const existingChatsSnapshot = await db.collection("chats")
                     .where("participants", "==", participants)
                     .limit(1)

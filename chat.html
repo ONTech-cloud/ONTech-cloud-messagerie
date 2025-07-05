@@ -1,257 +1,171 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat ON Tech</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif;
-    display: flex;
-    background: #f5f7fa;
-    overflow: hidden;
-  }
-
-  body {
-    display: flex;
-    flex-direction: row;
-  }
-
-  #sidebar {
-    width: 280px;
-    background: linear-gradient(135deg, #1976d2 0%, #63a4ff 100%);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-  #sidebar header {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    user-select: none;
-  }
-
-  #searchUserInput {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    margin-bottom: 16px;
-  }
-
-  #logoutBtn {
-    padding: 10px 12px;
-    margin-top: 10px;
-    border-radius: 8px;
-    background-color: #ef5350;
-    border: none;
-    color: white;
-    cursor: pointer;
-  }
-
-  #userList {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .userItem {
-    padding: 10px 12px;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.15);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-
-  .userItem:hover {
-    background: rgba(255,255,255,0.3);
-  }
-
-  #mainChat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-    box-shadow: inset 0 0 30px #ddd;
-    overflow: hidden;
-    width: calc(100% - 280px);
-  }
-
-  #chatHeader {
-    padding: 20px;
-    font-weight: 700;
-    border-bottom: 1px solid #ddd;
-    user-select: none;
-    background: #e3f2fd;
-  }
-
-  #chatMessages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #fefefe;
-  }
-
-  .message {
-    padding: 10px 14px;
-    background: #e1f5fe;
-    border-radius: 12px;
-    max-width: 70%;
-    align-self: flex-start;
-  }
-
-  .message.self {
-    background: #bbdefb;
-    align-self: flex-end;
-  }
-
-  #chatInputBox {
-    display: flex;
-    padding: 20px;
-    border-top: 1px solid #ccc;
-    background: #fafafa;
-  }
-
-  #chatInput {
-    flex: 1;
-    padding: 12px;
-    font-size: 15px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-
-  #sendBtn {
-    margin-left: 10px;
-    padding: 12px 20px;
-    font-size: 15px;
-    border: none;
-    border-radius: 10px;
-    background: #1976d2;
-    color: white;
-    cursor: pointer;
-  }
-</style>
-</head>
-<body>
-<div id="sidebar">
-  <header>📨 ON Tech</header>
-  <input id="searchUserInput" placeholder="Rechercher un utilisateur..." />
-  <button id="logoutBtn">Déconnexion</button>
-  <div id="userList"></div>
-</div>
-<div id="mainChat">
-  <div id="chatHeader">Sélectionnez un utilisateur</div>
-  <div id="chatMessages"></div>
-  <div id="chatInputBox">
-    <input id="chatInput" placeholder="Tapez un message..." />
-    <button id="sendBtn">Envoyer</button>
-  </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
-    authDomain: "messagerie-ontech-cloud.firebaseapp.com",
-    projectId: "messagerie-ontech-cloud",
-    storageBucket: "messagerie-ontech-cloud.appspot.com",
-    messagingSenderId: "45424467520",
-    appId: "1:45424467520:web:0d996077888bea6c5f09a5"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  let currentUser = null;
-  let selectedUser = null;
-  let unsubscribe = null;
-
-  const searchUserInput = document.getElementById("searchUserInput");
-  const userList = document.getElementById("userList");
-  const chatHeader = document.getElementById("chatHeader");
-  const chatMessages = document.getElementById("chatMessages");
-  const chatInput = document.getElementById("chatInput");
-  const sendBtn = document.getElementById("sendBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      currentUser = user;
-      searchUserInput.addEventListener("input", handleSearch);
-    } else {
-      window.location.href = "login.html";
+    .info-text, .error-text {
+        text-align: center;
+        color: #888;
+        padding: 20px;
+        margin: 0;
     }
-  });
 
-  logoutBtn.onclick = () => {
-    auth.signOut();
-  };
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
 
-  async function handleSearch() {
-    const term = searchUserInput.value.trim().toLowerCase();
-    userList.innerHTML = "";
-    if (!term) return;
-    const results = await db.collection("users").get();
-    results.forEach(doc => {
-      const data = doc.data();
-      if (doc.id !== currentUser.uid && data.username.toLowerCase().includes(term)) {
-        const div = document.createElement("div");
-        div.textContent = data.username;
-        div.className = "userItem";
-        div.onclick = () => selectUser(doc.id, data.username);
-        userList.appendChild(div);
-      }
-    });
-  }
+    .conversation-item:hover {
+        background: #f5f5f5;
+    }
 
-  function selectUser(uid, username) {
-    selectedUser = uid;
-    chatHeader.textContent = `Conversation avec ${username}`;
-    chatMessages.innerHTML = "";
-    if (unsubscribe) unsubscribe();
-    const chatId = [currentUser.uid, selectedUser].sort().join("_");
-    unsubscribe = db.collection("chats").doc(chatId).collection("messages")
-      .orderBy("createdAt")
-      .onSnapshot(snapshot => {
-        chatMessages.innerHTML = "";
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const div = document.createElement("div");
-          div.className = "message";
-          if (msg.sender === currentUser.uid) div.classList.add("self");
-          div.textContent = msg.text;
-          chatMessages.appendChild(div);
+    .conversation-item.active {
+        background-color: #e6f7ff;
+    }
+
+    .conversation-item.unread {
+        font-weight: bold;
+    }
+
+    .conversation-item.pinned {
+        background: #fffbe6;
+    }
+
+    .pin-icon {
+        margin-right: 8px;
+        color: #ffcc00;
+    }
+
+    .unread-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #ff3b30;
+        border-radius: 50%;
+        margin-left: 10px;
+    }
+
+    #conversation-list {
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+        padding-bottom: 10px;
+    }
+</style>
+
+<script>
+    loadConversations();
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("Permission de notification accordée.");
+                    } else {
+                        console.warn("Permission de notification refusée ou ignorée.");
+                    }
+                });
+            }
+        }
+    }
+
+    async function showNewMessageNotification(chatId, messageText, partnerId) {
+        if (Notification.permission === "granted" && chatId !== currentChatId) {
+            let partnerName = usernameCache[partnerId];
+            if (!partnerName) {
+                const partnerDoc = await db.collection("users").doc(partnerId).get();
+                partnerName = partnerDoc.exists ? partnerDoc.data().username || partnerDoc.data().email.split('@')[0] : "Quelqu'un";
+                usernameCache[partnerId] = partnerName;
+            }
+
+            new Notification(`Nouveau message de ${partnerName}`, {
+                body: messageText,
+                icon: 'https://via.placeholder.com/64/4A90E2/FFFFFF?text=ON',
+                tag: chatId,
+                renotify: true
+            });
+        }
+    }
+
+    async function loadConversations() {
+        if (!currentUser) {
+            conversationListDiv.innerHTML = '<p class="info-text">Veuillez vous connecter pour voir vos conversations.</p>';
+            return;
+        }
+        if (!currentUserData) {
+            conversationListDiv.innerHTML = '<p class="info-text">Chargement de votre profil...</p>';
+            return;
+        }
+
+        conversationListDiv.innerHTML = '<p class="info-text">Chargement des conversations...</p>';
+
+        try {
+            const userChatsSnapshot = await db.collection("chats")
+                .where("participants", "array-contains", currentUser.uid)
+                .orderBy("updatedAt", "desc")
+                .get();
+
+            const conversations = [];
+            const partnerIdsToFetch = new Set();
+
+            userChatsSnapshot.forEach(doc => {
+                const chatData = doc.data();
+                const chatId = doc.id;
+                const partnerId = chatData.participants.find(p => p !== currentUser.uid);
+                if (partnerId) {
+                    partnerIdsToFetch.add(partnerId);
+                    conversations.push({
+                        chatId,
+                        partnerId,
+                        lastMessageTimestamp: chatData.updatedAt ? chatData.updatedAt.toDate() : new Date(0),
+                        isPinned: currentUserData.pinnedChats?.includes(chatId),
+                        isUnread: unreadMessagesTracker[chatId] || false
+                    });
+                }
+            });
+
+            await Promise.all(Array.from(partnerIdsToFetch).map(async (pId) => {
+                if (!usernameCache[pId]) {
+                    const partnerDoc = await db.collection("users").doc(pId).get();
+                    usernameCache[pId] = partnerDoc.exists ? partnerDoc.data().username || partnerDoc.data().email.split('@')[0] : "Utilisateur Inconnu";
+                }
+            }));
+
+            conversations.sort((a, b) => {
+                if (a.isPinned && !b.isPinned) return -1;
+                if (!a.isPinned && b.isPinned) return 1;
+                return b.lastMessageTimestamp - a.lastMessageTimestamp;
+            });
+
+            conversationListDiv.innerHTML = '';
+            if (conversations.length === 0) {
+                conversationListDiv.innerHTML = '<p class="info-text">Aucune conversation pour le moment.<br>Cliquez sur <i class="fas fa-plus-circle"></i> pour en démarrer une.</p>';
+                return;
+            }
+
+            conversations.forEach(conv => {
+                const partnerName = usernameCache[conv.partnerId];
+                const itemHtml = `
+                    <div class="conversation-item ${conv.chatId === currentChatId ? 'active' : ''} ${conv.isUnread ? 'unread' : ''} ${conv.isPinned ? 'pinned' : ''}" data-chat-id="${conv.chatId}" data-partner-id="${conv.partnerId}">
+                        <span class="pin-icon"><i class="fas fa-star"></i></span>
+                        <span>${partnerName}</span>
+                        <span class="unread-dot"></span>
+                    </div>
+                `;
+                conversationListDiv.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            attachConversationClickListeners();
+
+        } catch (error) {
+            console.error("Erreur de chargement des conversations:", error);
+            conversationListDiv.innerHTML = '<p class="error-text">Erreur de chargement des conversations.</p>';
+        }
+    }
+
+    function attachConversationClickListeners() {
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.onclick = () => selectConversation(item.dataset.chatId, item.dataset.partnerId);
         });
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      });
-  }
-
-  sendBtn.onclick = async () => {
-    const text = chatInput.value.trim();
-    if (!text || !selectedUser) return;
-    const chatId = [currentUser.uid, selectedUser].sort().join("_");
-    await db.collection("chats").doc(chatId).collection("messages").add({
-      text,
-      sender: currentUser.uid,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    chatInput.value = "";
-  };
+    }
 </script>
-</body>
-</html>

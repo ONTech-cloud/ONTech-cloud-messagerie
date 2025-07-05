@@ -115,12 +115,17 @@
     align-self: flex-end;
   }
 
+  .message img {
+    max-width: 200px;
+    border-radius: 8px;
+  }
+
   #chatInputBox {
     display: flex;
     padding: 20px;
     border-top: 1px solid #ccc;
     background: #fafafa;
-    gap: 10px;
+    align-items: center;
   }
 
   #chatInput {
@@ -132,7 +137,8 @@
     outline: none;
   }
 
-  #sendBtn {
+  #sendBtn, #uploadBtn {
+    margin-left: 10px;
     padding: 12px 20px;
     font-size: 15px;
     border: none;
@@ -154,8 +160,9 @@
   <div id="chatHeader">Sélectionnez un utilisateur</div>
   <div id="chatMessages"></div>
   <div id="chatInputBox">
-    <input type="file" id="fileInput" accept="image/*,.pdf" />
     <input id="chatInput" placeholder="Tapez un message..." />
+    <input type="file" id="fileInput" hidden />
+    <button id="uploadBtn">📎</button>
     <button id="sendBtn">Envoyer</button>
   </div>
 </div>
@@ -173,7 +180,6 @@
     messagingSenderId: "45424467520",
     appId: "1:45424467520:web:0d996077888bea6c5f09a5"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -189,8 +195,9 @@
   const chatMessages = document.getElementById("chatMessages");
   const chatInput = document.getElementById("chatInput");
   const sendBtn = document.getElementById("sendBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
   const fileInput = document.getElementById("fileInput");
+  const logoutBtn = document.getElementById("logoutBtn");
 
   auth.onAuthStateChanged(async (user) => {
     if (user) {
@@ -237,14 +244,12 @@
           const div = document.createElement("div");
           div.className = "message";
           if (msg.sender === currentUser.uid) div.classList.add("self");
-          if (msg.text) {
+          if (msg.type === "image") {
+            const img = document.createElement("img");
+            img.src = msg.url;
+            div.appendChild(img);
+          } else {
             div.textContent = msg.text;
-          } else if (msg.fileURL) {
-            if (msg.fileURL.endsWith(".pdf")) {
-              div.innerHTML = `<a href="${msg.fileURL}" target="_blank">📄 ${msg.fileName}</a>`;
-            } else {
-              div.innerHTML = `<img src="${msg.fileURL}" style="max-width:200px; border-radius:8px;" />`;
-            }
           }
           chatMessages.appendChild(div);
         });
@@ -259,26 +264,28 @@
     await db.collection("chats").doc(chatId).collection("messages").add({
       text,
       sender: currentUser.uid,
+      type: "text",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     chatInput.value = "";
   };
 
-  fileInput.addEventListener("change", async () => {
+  uploadBtn.onclick = () => fileInput.click();
+
+  fileInput.onchange = async () => {
     const file = fileInput.files[0];
     if (!file || !selectedUser) return;
-    const fileRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
-    await fileRef.put(file);
-    const fileURL = await fileRef.getDownloadURL();
     const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    const ref = storage.ref().child(`chats/${chatId}/${Date.now()}_${file.name}`);
+    const snapshot = await ref.put(file);
+    const url = await snapshot.ref.getDownloadURL();
     await db.collection("chats").doc(chatId).collection("messages").add({
-      fileURL,
-      fileName: file.name,
+      url,
       sender: currentUser.uid,
+      type: "image",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    fileInput.value = "";
-  });
+  };
 </script>
 </body>
 </html>

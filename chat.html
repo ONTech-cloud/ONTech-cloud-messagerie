@@ -1,323 +1,325 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat ON Tech</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat ON Tech</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      font-family: 'Poppins', sans-serif;
-      background: #f5f7fa;
-      overflow: hidden;
-    }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: #f5f7fa;
+    overflow: hidden;
+  }
 
-    body {
-      display: flex;
-      flex-direction: row;
-    }
+  body {
+    display: flex;
+    flex-direction: row;
+  }
 
-    #sidebar {
-      width: 280px;
-      background: linear-gradient(135deg, #1976d2 0%, #63a4ff 100%);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+  #sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #1976d2 0%, #63a4ff 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+  }
 
-    #sidebar header {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      user-select: none;
-    }
+  #sidebar header {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    user-select: none;
+  }
 
-    #searchUserInput {
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
+  #searchUserInput {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
 
-    #userList {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+  #logoutBtn {
+    padding: 10px 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: #ef5350;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
 
-    .userItem {
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.15);
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      user-select: none;
-    }
+  #userList {
+    flex: 1;
+    overflow-y: auto;
+  }
 
-    .userItem:hover {
-      background: rgba(255,255,255,0.3);
-    }
+  .userItem {
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
 
-    #logoutBtn {
-      padding: 10px 12px;
-      border-radius: 8px;
-      background-color: #ef5350;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+  .userItem:hover {
+    background: rgba(255,255,255,0.3);
+  }
 
-    #mainChat {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: #fff;
-      width: 100%;
-    }
+  #mainChat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow: hidden;
+    width: calc(100% - 280px);
+  }
 
-    #chatHeader {
-      padding: 20px;
-      font-weight: 700;
-      border-bottom: 1px solid #ddd;
-      user-select: none;
-      background: #e3f2fd;
-    }
+  #chatHeader {
+    padding: 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #ddd;
+    user-select: none;
+    background: #e3f2fd;
+  }
 
-    #chatMessages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #fefefe;
-    }
+  #chatMessages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fefefe;
+  }
 
-    .message {
-      padding: 10px 14px;
-      background: #e1f5fe;
-      border-radius: 12px;
-      max-width: 70%;
-      align-self: flex-start;
-      word-break: break-word;
-    }
+  .message {
+    padding: 10px 14px;
+    background: #e1f5fe;
+    border-radius: 12px;
+    max-width: 70%;
+    align-self: flex-start;
+  }
 
-    .message.self {
-      background: #bbdefb;
-      align-self: flex-end;
-    }
+  .message.self {
+    background: #bbdefb;
+    align-self: flex-end;
+  }
 
-    .message img, .message a {
-      max-width: 100%;
-      margin-top: 5px;
-      display: block;
-    }
+  #chatInputBox {
+    display: flex;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+    background: #fafafa;
+    gap: 10px;
+  }
 
-    #chatInputBox {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 20px;
-      border-top: 1px solid #ccc;
-      background: #fafafa;
-    }
+  #chatInput {
+    flex: 1;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
 
-    #chatInput {
-      flex: 1;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
+  #sendBtn {
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+  }
+</style>
 
-    #sendBtn, #fileInputBtn {
-      padding: 12px 20px;
-      font-size: 15px;
-      border: none;
-      border-radius: 10px;
-      background: #1976d2;
-      color: white;
-      cursor: pointer;
-    }
 
-    #fileInput {
-      display: none;
-    }
-  </style>
+
+
+
+
+
+
+
+
+
+
+
 </head>
 <body>
-  <div id="sidebar">
-    <header>📨 ON Tech</header>
-    <input id="searchUserInput" placeholder="Rechercher un utilisateur..." />
-    <button id="logoutBtn">Déconnexion</button>
-    <div id="userList"></div>
+<div id="sidebar">
+  <header>📨 ON Tech</header>
+  <input id="searchUserInput" placeholder="Rechercher un utilisateur..." />
+  <button id="logoutBtn">Déconnexion</button>
+  <div id="userList"></div>
+</div>
+<div id="mainChat">
+  <div id="chatHeader">Sélectionnez un utilisateur</div>
+  <div id="chatMessages"></div>
+  <div id="chatInputBox">
+    <input type="file" id="fileInput" accept="image/*,.pdf" />
+    <input id="chatInput" placeholder="Tapez un message..." />
+    <button id="sendBtn">Envoyer</button>
   </div>
-  <div id="mainChat">
-    <div id="chatHeader">Sélectionnez un utilisateur</div>
-    <div id="chatMessages"></div>
-    <div id="chatInputBox">
-      <input id="chatInput" placeholder="Tapez un message..." />
-      <input type="file" id="fileInput" />
-      <button id="fileInputBtn">📎</button>
-      <button id="sendBtn">Envoyer</button>
-    </div>
-  </div>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
-      authDomain: "messagerie-ontech-cloud.firebaseapp.com",
-      projectId: "messagerie-ontech-cloud",
-      storageBucket: "messagerie-ontech-cloud.appspot.com",
-      messagingSenderId: "45424467520",
-      appId: "1:45424467520:web:0d996077888bea6c5f09a5"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhvSSuDOIWZM8XAYJanxi3dpDhTG3JHq4",
+    authDomain: "messagerie-ontech-cloud.firebaseapp.com",
+    projectId: "messagerie-ontech-cloud",
+    storageBucket: "messagerie-ontech-cloud.appspot.com",
+    messagingSenderId: "45424467520",
+    appId: "1:45424467520:web:0d996077888bea6c5f09a5"
+  };
 
-    let currentUser = null;
-    let selectedUser = null;
-    let unsubscribe = null;
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const storage = firebase.storage();
 
-    const searchUserInput = document.getElementById("searchUserInput");
-    const userList = document.getElementById("userList");
-    const chatHeader = document.getElementById("chatHeader");
-    const chatMessages = document.getElementById("chatMessages");
-    const chatInput = document.getElementById("chatInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const fileInput = document.getElementById("fileInput");
-    const fileInputBtn = document.getElementById("fileInputBtn");
+  let currentUser = null;
+  let selectedUser = null;
+  let unsubscribe = null;
 
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        searchUserInput.addEventListener("input", handleSearch);
-      } else {
-        window.location.href = "login.html";
+  const searchUserInput = document.getElementById("searchUserInput");
+  const userList = document.getElementById("userList");
+  const chatHeader = document.getElementById("chatHeader");
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const fileInput = document.getElementById("fileInput");
 
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      searchUserInput.addEventListener("input", handleSearch);
+    } else {
+      window.location.href = "login.html";
+    }
+  });
 
+  logoutBtn.onclick = () => {
+    auth.signOut();
+  };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  async function handleSearch() {
+    const term = searchUserInput.value.trim().toLowerCase();
+    userList.innerHTML = "";
+    if (!term) return;
+    const results = await db.collection("users").get();
+    results.forEach(doc => {
+      const data = doc.data();
+      if (doc.id !== currentUser.uid && data.username.toLowerCase().includes(term)) {
+        const div = document.createElement("div");
+        div.textContent = data.username;
+        div.className = "userItem";
+        div.onclick = () => selectUser(doc.id, data.username);
+        userList.appendChild(div);
       }
     });
+  }
 
-    logoutBtn.onclick = () => {
-      auth.signOut();
-    };
-
-    async function handleSearch() {
-      const term = searchUserInput.value.trim().toLowerCase();
-      userList.innerHTML = "";
-      if (!term) return;
-      const results = await db.collection("users").get();
-      results.forEach(doc => {
-        const data = doc.data();
-        if (doc.id !== currentUser.uid && data.username.toLowerCase().includes(term)) {
-
+  function selectUser(uid, username) {
+    selectedUser = uid;
+    chatHeader.textContent = `Conversation avec ${username}`;
+    chatMessages.innerHTML = "";
+    if (unsubscribe) unsubscribe();
+    const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    unsubscribe = db.collection("chats").doc(chatId).collection("messages")
+      .orderBy("createdAt")
+      .onSnapshot(snapshot => {
+        chatMessages.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
           const div = document.createElement("div");
-          div.textContent = data.username;
-          div.className = "userItem";
-          div.onclick = () => selectUser(doc.id, data.username);
-          userList.appendChild(div);
-        }
+          div.className = "message";
+          if (msg.sender === currentUser.uid) div.classList.add("self");
+          if (msg.text) {
+            div.textContent = msg.text;
+          } else if (msg.fileURL) {
+            if (msg.fileURL.endsWith(".pdf")) {
+              div.innerHTML = `<a href="${msg.fileURL}" target="_blank">📄 ${msg.fileName}</a>`;
+            } else {
+              div.innerHTML = `<img src="${msg.fileURL}" style="max-width:200px; border-radius:8px;" />`;
 
-      });
-    }
 
-    function selectUser(uid, username) {
-      selectedUser = uid;
-      chatHeader.textContent = `Conversation avec ${username}`;
-      chatMessages.innerHTML = "";
-      if (unsubscribe) unsubscribe();
-      const chatId = [currentUser.uid, selectedUser].sort().join("_");
-      unsubscribe = db.collection("chats").doc(chatId).collection("messages")
-        .orderBy("createdAt")
-        .onSnapshot(snapshot => {
-          chatMessages.innerHTML = "";
-          snapshot.forEach(doc => {
-            const msg = doc.data();
-            const div = document.createElement("div");
-            div.className = "message";
-            if (msg.sender === currentUser.uid) div.classList.add("self");
-            if (msg.text) div.textContent = msg.text;
-            if (msg.fileUrl) {
-              if (msg.fileType.startsWith("image/")) {
-                const img = document.createElement("img");
-                img.src = msg.fileUrl;
-                div.appendChild(img);
-              } else {
-                const link = document.createElement("a");
-                link.href = msg.fileUrl;
-                link.textContent = "📎 Télécharger le fichier";
-                link.target = "_blank";
-                div.appendChild(link);
-              }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
-            chatMessages.appendChild(div);
-          });
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+          chatMessages.appendChild(div);
+
         });
-    }
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+  }
 
-    sendBtn.onclick = async () => {
-      const text = chatInput.value.trim();
-      if (!text && !fileInput.files[0]) return;
-      if (!selectedUser) return;
+  sendBtn.onclick = async () => {
+    const text = chatInput.value.trim();
+    if (!text || !selectedUser) return;
+    const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    await db.collection("chats").doc(chatId).collection("messages").add({
+      text,
+      sender: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    chatInput.value = "";
+  };
 
-      const chatId = [currentUser.uid, selectedUser].sort().join("_");
-      const message = {
-        sender: currentUser.uid,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      };
-
-      if (text) message.text = text;
-
-      if (fileInput.files[0]) {
-        const file = fileInput.files[0];
-        const storageRef = storage.ref().child(`files/${chatId}/${Date.now()}_${file.name}`);
-        const snapshot = await storageRef.put(file);
-        const fileUrl = await snapshot.ref.getDownloadURL();
-        message.fileUrl = fileUrl;
-        message.fileType = file.type;
-        fileInput.value = "";
-      }
-
-      await db.collection("chats").doc(chatId).collection("messages").add(message);
-      chatInput.value = "";
-    };
-
-    fileInputBtn.onclick = () => fileInput.click();
-  </script>
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file || !selectedUser) return;
+    const fileRef = storage.ref(`uploads/${Date.now()}_${file.name}`);
+    await fileRef.put(file);
+    const fileURL = await fileRef.getDownloadURL();
+    const chatId = [currentUser.uid, selectedUser].sort().join("_");
+    await db.collection("chats").doc(chatId).collection("messages").add({
+      fileURL,
+      fileName: file.name,
+      sender: currentUser.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    fileInput.value = "";
+  });
+</script>
 </body>
 </html>
